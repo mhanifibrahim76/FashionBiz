@@ -1,0 +1,10 @@
+SKU,Nama,Category,Harga Beli,Harga Jual,Stok,Min Stock
+KS-BLK-01,Kaos Oversize Hitam,Kaos,45000,89900,50,10
+KS-WHT-M,Kaos Oversize Putih,Kaos,45000,89900,32,10
+HOD-BLK-M,Hoodie Basic Hitam,Hoodie,85000,169900,15,5
+KMC-NVY-M,Kemeja Casual Navy,Kemeja,55000,129900,20,8
+KMC-WHT-L,Kemeja Casual Putih,Kemeja,55000,129900,15,8
+CLC-KHK-32,Celana Cargo Khaki,Celana,65000,149900,14,8
+CLC-BLK-34,Celana Cargo Hitam,Celana,65000,149900,10,8
+JKT-DNM-M,Jaket Denim Biru,Jaket,120000,249900,8,5
+JKT-BLK-L,Jaket Denim Hitam,Jaket,120000,249900,5,5

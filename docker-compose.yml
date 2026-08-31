@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fashionbiz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fashionbiz
+      POSTGRES_PASSWORD: fashionbiz123
+      POSTGRES_DB: fashionbiz
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fashionbiz-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fashionbiz-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://fashionbiz:fashionbiz123@postgres:5432/fashionbiz?schema=public
+      NEXTAUTH_SECRET: your-secret-key-here-change-in-production
+      NEXTAUTH_URL: http://localhost:3000
+      OPENAI_API_KEY: your-openai-api-key-here
+    depends_on:
+      - postgres
+    volumes:
+      - ./prisma:/app/prisma
+    networks:
+      - fashionbiz-network
+
+volumes:
+  postgres_data:
+
+networks:
+  fashionbiz-network:
+    driver: bridge

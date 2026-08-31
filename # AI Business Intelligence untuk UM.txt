@@ -1,0 +1,1478 @@
+# AI Business Intelligence untuk UMKM Fashion
+
+## 1. Gambaran Umum Produk
+
+Buat sebuah web application modern bernama sementara **FashionBiz AI**, yaitu platform Business Intelligence berbasis Artificial Intelligence yang membantu pemilik UMKM pakaian memahami kondisi bisnis mereka, menganalisis data penjualan dan keuangan, mengelola persediaan, serta mendapatkan rekomendasi keputusan bisnis berdasarkan data.
+
+Aplikasi bukan sekadar aplikasi kasir atau pencatatan keuangan.
+
+Konsep utama aplikasi adalah:
+
+**Data bisnis → Perhitungan → Analitik → Visualisasi → AI Insight → Rekomendasi Keputusan**
+
+Tujuan utama:
+
+> Membantu pemilik UMKM pakaian mengubah data operasional yang sebelumnya hanya berupa catatan transaksi menjadi informasi bisnis yang mudah dipahami dan rekomendasi tindakan yang dapat membantu pengambilan keputusan.
+
+Aplikasi harus menggunakan Bahasa Indonesia sebagai bahasa utama.
+
+Website harus dibuat sebagai functional prototype, bukan sekadar desain statis.
+
+---
+
+# 2. Target Pengguna
+
+Target utama adalah:
+
+**Pemilik atau pengelola UMKM pakaian/fashion skala kecil dan menengah.**
+
+Contoh bisnis:
+
+* toko pakaian
+* brand pakaian lokal
+* online shop pakaian
+* UMKM produksi pakaian
+* usaha konveksi kecil
+* usaha fashion yang menjual produk sendiri
+
+Pengguna diasumsikan belum memiliki sistem Business Intelligence yang kompleks.
+
+Karena itu, aplikasi harus mudah digunakan oleh pengguna yang tidak memiliki latar belakang data science.
+
+---
+
+# 3. Masalah yang Diselesaikan
+
+Aplikasi harus berangkat dari masalah nyata:
+
+1. Pemilik UMKM memiliki data penjualan tetapi sulit memahami pola penjualan.
+2. Pemilik UMKM mengetahui omzet tetapi belum tentu mengetahui keuntungan sebenarnya.
+3. Pengeluaran sering tercatat terpisah sehingga sulit mengetahui sumber biaya terbesar.
+4. Pemilik UMKM sulit mengetahui produk mana yang paling menguntungkan.
+5. Produk yang laku dan produk yang menghasilkan laba belum tentu sama.
+6. Stok dapat menumpuk pada produk yang kurang laku.
+7. Produk yang laku dapat kehabisan stok.
+8. Pemilik UMKM sering mengambil keputusan berdasarkan intuisi daripada data.
+9. Data penjualan, pengeluaran, produk, stok, dan supplier belum terintegrasi.
+10. Pemilik UMKM membutuhkan ringkasan kondisi bisnis dan rekomendasi tindakan yang mudah dipahami.
+
+---
+
+# 4. Solusi Utama
+
+FashionBiz AI mengintegrasikan data:
+
+* produk
+* kategori
+* ukuran
+* warna
+* harga modal
+* harga jual
+* penjualan
+* pengeluaran
+* pembelian
+* stok
+* supplier
+* target bisnis
+
+Kemudian sistem menghitung dan menganalisis:
+
+* omzet
+* HPP
+* laba kotor
+* laba bersih
+* margin keuntungan
+* pertumbuhan penjualan
+* pertumbuhan laba
+* biaya operasional
+* produk terlaris
+* produk paling menguntungkan
+* produk dengan performa rendah
+* stok kritis
+* stok berlebih
+* pola penjualan
+* performa kategori
+* performa ukuran
+* performa warna
+
+AI kemudian menghasilkan:
+
+* Business Insight
+* peringatan
+* prioritas masalah
+* rekomendasi tindakan
+* alasan dari rekomendasi
+* kemungkinan dampak keputusan
+
+---
+
+# 5. FLOW UTAMA APLIKASI
+
+## FLOW 1 — Landing Page
+
+Pengguna membuka website.
+
+Tampilkan:
+
+* logo FashionBiz AI
+* headline yang menjelaskan manfaat aplikasi
+* penjelasan singkat
+* visual dashboard
+* fitur utama
+* manfaat untuk UMKM
+* cara kerja
+* CTA "Mulai Kelola Bisnis"
+
+CTA mengarah ke halaman login/register.
+
+---
+
+# 6. FLOW 2 — Registrasi
+
+Pengguna membuat akun.
+
+Input:
+
+* nama pemilik
+* nama usaha
+* email
+* nomor telepon
+* password
+* konfirmasi password
+
+Setelah registrasi berhasil, pengguna diarahkan ke onboarding.
+
+---
+
+# 7. FLOW 3 — Onboarding UMKM
+
+Pada penggunaan pertama, pengguna harus mengisi profil bisnis.
+
+Data:
+
+### Informasi Usaha
+
+* nama usaha
+* jenis usaha
+* deskripsi usaha
+* tahun berdiri
+* lokasi
+* jumlah karyawan
+* kanal penjualan
+
+Kanal penjualan:
+
+* toko fisik
+* Instagram
+* TikTok
+* marketplace
+* WhatsApp
+* website
+* lainnya
+
+### Target Bisnis
+
+* target omzet bulanan
+* target laba bulanan
+* target penjualan
+* target pertumbuhan
+
+Setelah selesai, sistem membuat dashboard awal.
+
+---
+
+# 8. STRUKTUR NAVIGASI UTAMA
+
+Gunakan sidebar dashboard dengan menu:
+
+1. Dashboard
+2. Penjualan
+3. Produk
+4. Inventory
+5. Pengeluaran
+6. Pembelian
+7. Supplier
+8. Analitik
+9. AI Business Advisor
+10. Laporan
+11. Target Bisnis
+12. Pengaturan
+
+Tambahkan profil pengguna pada bagian bawah sidebar.
+
+Gunakan responsive navigation untuk mobile.
+
+---
+
+# 9. HALAMAN DASHBOARD
+
+Dashboard adalah halaman utama setelah login.
+
+Tujuan dashboard:
+
+Memberikan gambaran kondisi bisnis secara cepat tanpa pengguna harus membuka setiap modul.
+
+## Bagian Header
+
+Tampilkan:
+
+* "Selamat datang, [Nama]"
+* nama usaha
+* date range selector
+* tombol refresh data
+* notification icon
+
+Date range:
+
+* Hari ini
+* 7 hari terakhir
+* Bulan ini
+* Bulan lalu
+* 3 bulan
+* 6 bulan
+* 1 tahun
+* Custom
+
+---
+
+## KPI Cards
+
+Tampilkan:
+
+### Omzet
+
+Total pendapatan pada periode terpilih.
+
+Tampilkan:
+
+* nilai omzet
+* persentase perubahan dibanding periode sebelumnya
+* indikator naik/turun
+
+### Total Pengeluaran
+
+Tampilkan:
+
+* total biaya
+* perubahan dibanding periode sebelumnya
+
+### Laba Bersih
+
+Formula:
+
+**Laba Bersih = Pendapatan - HPP - Biaya Operasional**
+
+### Margin Laba
+
+Formula:
+
+**Margin = Laba Bersih / Pendapatan × 100%**
+
+### Total Transaksi
+
+Jumlah transaksi pada periode terpilih.
+
+### Nilai Stok
+
+Total nilai persediaan.
+
+---
+
+# 10. GRAFIK DASHBOARD
+
+Dashboard harus memiliki visualisasi data.
+
+## Grafik 1 — Tren Omzet
+
+Line chart.
+
+Menampilkan omzet berdasarkan waktu.
+
+User dapat melihat:
+
+* tren naik
+* tren turun
+* periode penjualan tertinggi
+* periode penjualan terendah
+
+## Grafik 2 — Tren Laba
+
+Line chart untuk melihat perkembangan laba.
+
+## Grafik 3 — Omzet vs Pengeluaran
+
+Comparison chart.
+
+Tujuannya melihat apakah pertumbuhan omzet diikuti pertumbuhan biaya.
+
+## Grafik 4 — Penjualan Berdasarkan Kategori
+
+Bar chart.
+
+Contoh:
+
+* Kaos
+* Hoodie
+* Kemeja
+* Celana
+* Jaket
+
+## Grafik 5 — Produk Terlaris
+
+Ranking produk berdasarkan jumlah terjual.
+
+## Grafik 6 — Produk Paling Menguntungkan
+
+Ranking berdasarkan total kontribusi laba.
+
+---
+
+# 11. BUSINESS HEALTH SCORE
+
+Buat komponen khusus:
+
+## Business Health Score
+
+Contoh:
+
+**82 / 100**
+
+Label:
+
+**Kondisi bisnis: Baik**
+
+Score dihitung dari beberapa indikator:
+
+* profitabilitas
+* pertumbuhan penjualan
+* kondisi stok
+* pengeluaran
+* pencapaian target
+
+Tampilkan breakdown:
+
+* Profitabilitas: Baik
+* Penjualan: Sangat Baik
+* Inventory: Perlu perhatian
+* Pengeluaran: Perlu perhatian
+* Target: Baik
+
+Gunakan visual progress/radial score yang mudah dipahami.
+
+---
+
+# 12. AI BUSINESS INSIGHT DI DASHBOARD
+
+Buat card khusus:
+
+## AI Business Insight
+
+AI membaca data analitik yang sudah dihitung sistem.
+
+Contoh:
+
+> "Omzet meningkat 15% dibanding bulan sebelumnya, tetapi biaya bahan meningkat 27%. Pertumbuhan laba menjadi lebih rendah dibanding pertumbuhan omzet."
+
+Di bawah insight tampil:
+
+### Prioritas
+
+**Tinggi**
+
+### Rekomendasi
+
+> "Evaluasi biaya bahan pada produk dengan volume penjualan tertinggi dan pertimbangkan mencari supplier alternatif."
+
+Tambahkan tombol:
+
+**"Lihat Analisis Lengkap"**
+
+yang mengarah ke AI Business Advisor.
+
+AI tidak boleh hanya memberikan jawaban generik. Insight harus berasal dari data yang tersedia dalam aplikasi.
+
+---
+
+# 13. HALAMAN PENJUALAN
+
+Halaman untuk mencatat dan mengelola transaksi.
+
+## Tabel Penjualan
+
+Kolom:
+
+* ID transaksi
+* tanggal
+* produk
+* variasi
+* ukuran
+* warna
+* jumlah
+* harga satuan
+* diskon
+* total
+* metode pembayaran
+* kanal penjualan
+
+Metode pembayaran:
+
+* Cash
+* Transfer
+* E-wallet
+* Marketplace
+* lainnya
+
+## Fitur
+
+* tambah transaksi
+* edit transaksi
+* hapus transaksi
+* search
+* filter tanggal
+* filter produk
+* filter kategori
+* filter kanal
+* filter metode pembayaran
+* export data
+
+---
+
+# 14. HALAMAN PRODUK
+
+Halaman untuk mengelola katalog produk.
+
+Setiap produk memiliki:
+
+* nama produk
+* SKU
+* kategori
+* deskripsi
+* foto
+* harga modal
+* harga jual
+* margin
+* ukuran
+* warna
+* supplier
+* stok
+* minimum stok
+* status produk
+
+Contoh variasi:
+
+**Kaos Oversize**
+
+Ukuran:
+
+* S
+* M
+* L
+* XL
+
+Warna:
+
+* Hitam
+* Putih
+* Navy
+* Abu
+
+Setiap kombinasi ukuran dan warna dapat memiliki stok sendiri.
+
+---
+
+# 15. PRODUCT PERFORMANCE
+
+Pada halaman detail produk tampilkan:
+
+* total terjual
+* total pendapatan
+* total HPP
+* total laba
+* margin
+* stok
+* rata-rata penjualan harian
+* tren penjualan
+* performa ukuran
+* performa warna
+
+Tambahkan AI insight.
+
+Contoh:
+
+> "Ukuran M menyumbang penjualan terbesar untuk produk ini."
+
+atau:
+
+> "Warna hitam memiliki tingkat penjualan lebih tinggi dibanding warna lainnya."
+
+---
+
+# 16. HALAMAN INVENTORY
+
+Tujuan:
+
+Membantu pengguna mengelola stok.
+
+Tampilkan:
+
+* total SKU
+* total unit
+* nilai inventory
+* stok kritis
+* stok berlebih
+* produk tidak bergerak
+
+## Status stok
+
+### Aman
+
+Stok masih mencukupi.
+
+### Perlu perhatian
+
+Stok mulai mendekati minimum.
+
+### Kritis
+
+Stok diperkirakan segera habis.
+
+### Overstock
+
+Stok tinggi tetapi tingkat penjualan rendah.
+
+---
+
+# 17. INVENTORY DETAIL
+
+Untuk setiap produk tampilkan:
+
+* stok awal
+* stok masuk
+* stok keluar
+* retur
+* barang rusak
+* stok akhir
+* minimum stok
+* rata-rata penjualan
+* estimasi hari sampai habis
+
+Buat tombol:
+
+**"Rekomendasi Restock"**
+
+AI dapat memberikan:
+
+> "Berdasarkan rata-rata penjualan 14 hari terakhir dan stok saat ini, produk ini diperkirakan habis dalam 3 hari."
+
+---
+
+# 18. HALAMAN PENGELUARAN
+
+Pengguna dapat mencatat seluruh pengeluaran.
+
+Kategori:
+
+* bahan baku
+* produksi
+* packaging
+* listrik
+* air
+* sewa
+* gaji
+* transportasi
+* marketing
+* biaya marketplace
+* pajak
+* operasional
+* lainnya
+
+Data:
+
+* tanggal
+* kategori
+* nominal
+* metode pembayaran
+* keterangan
+* lampiran opsional
+
+Tampilkan grafik pengeluaran berdasarkan kategori.
+
+---
+
+# 19. HALAMAN PEMBELIAN
+
+Digunakan untuk mencatat pembelian barang/bahan dari supplier.
+
+Data:
+
+* nomor pembelian
+* tanggal
+* supplier
+* produk/bahan
+* jumlah
+* harga satuan
+* total
+* status pembayaran
+* tanggal jatuh tempo jika ada
+
+Data pembelian otomatis memengaruhi inventory.
+
+---
+
+# 20. HALAMAN SUPPLIER
+
+Data supplier:
+
+* nama supplier
+* kontak
+* alamat
+* produk yang disediakan
+* harga terakhir
+* histori pembelian
+* total pembelian
+
+Tambahkan analisis:
+
+* supplier dengan harga terbaik
+* supplier paling sering digunakan
+* perubahan harga bahan
+* histori harga
+
+Jika data tersedia, AI dapat memberikan insight:
+
+> "Harga bahan dari Supplier A meningkat selama tiga periode pembelian terakhir."
+
+---
+
+# 21. HALAMAN ANALITIK
+
+Ini merupakan salah satu halaman utama aplikasi.
+
+Gunakan dashboard analitik dengan beberapa tab.
+
+## Tab Financial Analytics
+
+Tampilkan:
+
+* omzet
+* HPP
+* gross profit
+* operational expense
+* net profit
+* profit margin
+* growth
+
+Grafik:
+
+* omzet
+* laba
+* pengeluaran
+* margin
+
+---
+
+## Tab Product Analytics
+
+Tampilkan:
+
+* produk terlaris
+* produk paling menguntungkan
+* produk dengan margin tertinggi
+* produk dengan margin terendah
+* produk kurang laku
+* kontribusi produk terhadap omzet
+* kontribusi produk terhadap laba
+
+---
+
+## Tab Sales Analytics
+
+Tampilkan:
+
+* penjualan harian
+* mingguan
+* bulanan
+* tren
+* peak period
+* kanal penjualan
+* kategori
+* ukuran
+* warna
+
+---
+
+## Tab Inventory Analytics
+
+Tampilkan:
+
+* inventory turnover
+* stok kritis
+* stok berlebih
+* dead stock
+* estimasi stock-out
+* nilai inventory
+
+---
+
+# 22. HALAMAN AI BUSINESS ADVISOR
+
+Ini merupakan fitur inti aplikasi.
+
+Halaman AI Business Advisor memiliki dua bagian:
+
+## Bagian A — AI Summary
+
+AI memberikan ringkasan kondisi bisnis.
+
+Contoh:
+
+> "Dalam 30 hari terakhir, omzet meningkat 12%, tetapi laba hanya meningkat 4%. Penyebab utama adalah peningkatan biaya bahan dan biaya operasional."
+
+---
+
+## Bagian B — Recommended Actions
+
+Tampilkan rekomendasi dalam bentuk kartu.
+
+Contoh:
+
+### Prioritas Tinggi
+
+**Evaluasi harga produk A**
+
+Alasan:
+
+Margin produk turun dari 31% menjadi 24%.
+
+Potensi dampak:
+
+**Profitabilitas**
+
+Tombol:
+
+**Lihat Detail**
+
+---
+
+### Prioritas Sedang
+
+**Restock produk B**
+
+Alasan:
+
+Stok diperkirakan habis dalam 4 hari.
+
+---
+
+### Prioritas Rendah
+
+**Evaluasi produk C**
+
+Alasan:
+
+Produk memiliki tingkat penjualan rendah dan inventory tinggi.
+
+---
+
+# 23. AI ANALYSIS DETAIL
+
+Ketika pengguna membuka sebuah rekomendasi, tampilkan:
+
+### Masalah
+
+Apa yang terdeteksi.
+
+### Data Pendukung
+
+Angka dan grafik yang mendukung keputusan.
+
+### Analisis AI
+
+Penjelasan mengenai pola yang ditemukan.
+
+### Rekomendasi
+
+Apa yang sebaiknya dilakukan.
+
+### Prioritas
+
+* Rendah
+* Sedang
+* Tinggi
+* Kritis
+
+### Potensi Dampak
+
+* Profit
+* Penjualan
+* Inventory
+* Cash Flow
+* Operasional
+
+### Alasan
+
+AI harus menjelaskan alasan rekomendasi berdasarkan data.
+
+---
+
+# 24. AI CHAT ASSISTANT
+
+Tambahkan chatbot sebagai fitur tambahan, bukan sebagai satu-satunya fungsi AI.
+
+Pengguna dapat bertanya:
+
+> "Produk apa yang paling menguntungkan bulan ini?"
+
+> "Kenapa laba saya turun?"
+
+> "Produk mana yang harus saya restock?"
+
+> "Pengeluaran terbesar saya apa?"
+
+> "Bagaimana performa penjualan bulan ini?"
+
+AI harus menjawab berdasarkan data bisnis pengguna.
+
+Jangan membuat AI memberikan informasi seolah-olah berasal dari data jika data tersebut tidak tersedia.
+
+---
+
+# 25. HALAMAN TARGET BISNIS
+
+Pengguna dapat menentukan:
+
+* target omzet
+* target laba
+* target transaksi
+* target penjualan produk
+* target pertumbuhan
+
+Dashboard kemudian menampilkan:
+
+**Target vs Realisasi**
+
+Contoh:
+
+Target omzet:
+
+Rp20.000.000
+
+Realisasi:
+
+Rp17.500.000
+
+Progress:
+
+87,5%
+
+AI dapat memberikan insight:
+
+> "Dengan sisa periode 7 hari dan rata-rata penjualan saat ini, target omzet diperkirakan belum tercapai."
+
+Kemudian memberikan rekomendasi tindakan.
+
+---
+
+# 26. HALAMAN LAPORAN
+
+Pengguna dapat membuat laporan:
+
+* laporan penjualan
+* laporan laba rugi
+* laporan pengeluaran
+* laporan inventory
+* laporan produk
+* laporan supplier
+
+Filter:
+
+* tanggal
+* kategori
+* produk
+* supplier
+
+Sediakan tombol:
+
+**Export PDF**
+
+dan
+
+**Export CSV/Excel**
+
+---
+
+# 27. NOTIFICATION CENTER
+
+Sistem dapat memberikan notifikasi berdasarkan kondisi bisnis.
+
+Contoh:
+
+### Inventory
+
+> "Stok Kaos Oversize M hampir habis."
+
+### Financial
+
+> "Pengeluaran bulan ini meningkat 22%."
+
+### Sales
+
+> "Penjualan minggu ini turun 12%."
+
+### Target
+
+> "Pencapaian target omzet saat ini 78%."
+
+### AI
+
+> "Ada 3 rekomendasi bisnis yang perlu diperhatikan."
+
+---
+
+# 28. HALAMAN PENGATURAN
+
+Berisi:
+
+### Profil
+
+* nama
+* email
+* nomor telepon
+
+### Profil Bisnis
+
+* nama usaha
+* kategori
+* lokasi
+* kanal penjualan
+
+### Preferensi
+
+* mata uang
+* format tanggal
+* notifikasi
+
+### Pengaturan AI
+
+* tingkat detail rekomendasi
+* preferensi notifikasi
+
+---
+
+# 29. DATABASE / DATA MODEL
+
+Gunakan struktur database yang terorganisasi.
+
+Minimal entitas:
+
+* users
+* businesses
+* products
+* product_variants
+* categories
+* sales
+* sale_items
+* expenses
+* expense_categories
+* purchases
+* purchase_items
+* suppliers
+* inventory_transactions
+* business_targets
+* ai_insights
+* notifications
+
+Relasi utama:
+
+**Business**
+
+memiliki banyak:
+
+* products
+* sales
+* expenses
+* purchases
+* suppliers
+* targets
+
+**Product**
+
+memiliki banyak:
+
+* product_variants
+* sale_items
+* inventory_transactions
+
+---
+
+# 30. BUSINESS CALCULATION ENGINE
+
+Sistem harus menghitung data bisnis secara konsisten.
+
+## Revenue
+
+Revenue = total penjualan setelah diskon.
+
+## HPP
+
+HPP = jumlah produk terjual × harga modal yang relevan.
+
+## Gross Profit
+
+Gross Profit = Revenue - HPP
+
+## Net Profit
+
+Net Profit = Revenue - HPP - Operational Expenses
+
+## Profit Margin
+
+Profit Margin = Net Profit / Revenue × 100%
+
+## Average Selling Price
+
+Average Selling Price = Total Revenue / Total Unit Terjual
+
+## Inventory Value
+
+Inventory Value = jumlah stok × harga modal
+
+Gunakan perhitungan terpusat agar angka pada dashboard, laporan, dan AI konsisten.
+
+---
+
+# 31. AI ARCHITECTURE
+
+AI tidak boleh mengambil data mentah secara sembarangan.
+
+Gunakan alur:
+
+**Database**
+
+↓
+
+**Business Calculation Engine**
+
+↓
+
+**Analytics Layer**
+
+↓
+
+**Structured Business Data**
+
+↓
+
+**AI**
+
+↓
+
+**Insight & Recommendation**
+
+Contoh structured data yang diberikan kepada AI:
+
+* revenue_current_period
+* revenue_previous_period
+* profit_current_period
+* profit_previous_period
+* expense_growth
+* top_products
+* low_performing_products
+* critical_stock
+* target_progress
+
+AI kemudian menghasilkan output terstruktur:
+
+* insight
+* issue
+* priority
+* recommendation
+* reasoning
+* impact
+
+---
+
+# 32. AI HARUS EXPLAINABLE
+
+Setiap rekomendasi AI harus dapat ditelusuri ke data.
+
+Jangan memberikan rekomendasi:
+
+> "Naikkan harga produk."
+
+tanpa alasan.
+
+Harus seperti:
+
+> "Margin Produk A turun dari 32% menjadi 24% selama dua bulan terakhir karena harga modal meningkat sementara harga jual tetap. Evaluasi harga jual atau biaya supplier dapat dipertimbangkan."
+
+Tampilkan data pendukung di samping rekomendasi.
+
+---
+
+# 33. DEMO DATA
+
+Karena aplikasi merupakan prototype lomba, sediakan seeded demo data yang realistis.
+
+Contoh bisnis:
+
+**Nusantara Wear**
+
+Produk:
+
+* Kaos Oversize
+* Hoodie Basic
+* Kemeja Casual
+* Celana Cargo
+* Jaket Denim
+
+Gunakan variasi:
+
+* ukuran
+* warna
+* harga modal
+* harga jual
+* stok
+* transaksi
+
+Buat data historis beberapa bulan agar chart dan AI memiliki data untuk dianalisis.
+
+Data demo harus jelas ditandai sebagai **data simulasi/demo**, bukan data bisnis nyata.
+
+---
+
+# 34. USER EXPERIENCE
+
+Prioritaskan kemudahan penggunaan.
+
+Pemilik UMKM tidak boleh dipaksa memahami istilah data science.
+
+Gunakan bahasa sederhana.
+
+Contoh:
+
+Jangan hanya:
+
+> Inventory Turnover
+
+Tetapi:
+
+> **Perputaran Stok**
+
+Jika istilah teknis digunakan, berikan tooltip penjelasan.
+
+Gunakan empty state yang informatif.
+
+Contoh:
+
+> "Belum ada transaksi. Tambahkan transaksi pertama untuk mulai melihat analisis bisnis."
+
+---
+
+# 35. UI DESIGN
+
+Gunakan desain dashboard modern, profesional, bersih, dan cocok untuk aplikasi bisnis.
+
+Karakteristik:
+
+* modern
+* minimalis
+* profesional
+* responsive
+* mudah dibaca
+* konsisten
+* tidak terlalu ramai
+
+Gunakan:
+
+* sidebar
+* cards
+* charts
+* tables
+* badges
+* progress bars
+* alerts
+* modal
+* dropdown
+* tabs
+
+Gunakan visual hierarchy yang jelas.
+
+Dashboard harus membuat informasi penting dapat dipahami dalam beberapa detik.
+
+---
+
+# 36. RESPONSIVE DESIGN
+
+Website harus responsive untuk:
+
+* desktop
+* laptop
+* tablet
+* mobile
+
+Dashboard desktop dapat menggunakan sidebar.
+
+Pada mobile, sidebar berubah menjadi drawer atau bottom navigation.
+
+Chart harus responsive.
+
+Table dapat menggunakan horizontal scrolling pada layar kecil.
+
+---
+
+# 37. MAIN USER FLOW
+
+Flow lengkap:
+
+Landing Page
+
+↓
+
+Register / Login
+
+↓
+
+Business Onboarding
+
+↓
+
+Dashboard
+
+↓
+
+Input Data
+
+├── Produk
+
+├── Penjualan
+
+├── Pengeluaran
+
+├── Pembelian
+
+├── Supplier
+
+└── Inventory
+
+↓
+
+Business Calculation Engine
+
+↓
+
+Analytics
+
+├── Financial Analytics
+
+├── Sales Analytics
+
+├── Product Analytics
+
+└── Inventory Analytics
+
+↓
+
+AI Analysis
+
+↓
+
+Business Insight
+
+↓
+
+Recommended Actions
+
+↓
+
+User mengambil keputusan
+
+↓
+
+Data bisnis diperbarui
+
+↓
+
+Dashboard dan AI diperbarui kembali
+
+---
+
+# 38. CONTOH USER JOURNEY
+
+Contoh pengguna:
+
+Pemilik UMKM "Nusantara Wear".
+
+Ia mencatat transaksi selama satu bulan.
+
+Sistem menemukan:
+
+* omzet meningkat
+* biaya meningkat lebih cepat
+* satu produk sangat laku
+* satu produk memiliki stok tinggi
+* margin produk tertentu turun
+
+Dashboard menampilkan kondisi tersebut.
+
+AI kemudian memberikan:
+
+**Insight 1**
+
+"Omzet meningkat 15%, tetapi laba hanya meningkat 5%."
+
+**Insight 2**
+
+"Biaya bahan meningkat 22%."
+
+**Insight 3**
+
+"Produk Kaos Oversize Black M memiliki permintaan tinggi."
+
+**Insight 4**
+
+"Kemeja Casual White memiliki stok tinggi dengan penjualan rendah."
+
+Kemudian sistem memberikan:
+
+**Rekomendasi 1**
+
+Restock Kaos Oversize Black M.
+
+**Rekomendasi 2**
+
+Evaluasi harga atau supplier untuk produk dengan margin menurun.
+
+**Rekomendasi 3**
+
+Promosikan atau bundling Kemeja Casual White untuk mengurangi stok.
+
+Dengan demikian aplikasi membantu pengguna bergerak dari:
+
+**"Saya punya banyak data."**
+
+menjadi:
+
+**"Saya tahu kondisi bisnis saya."**
+
+dan akhirnya:
+
+**"Saya tahu apa yang harus saya lakukan."**
+
+---
+
+# 39. PRIORITAS FITUR UNTUK FUNCTIONAL PROTOTYPE
+
+Jangan mencoba membuat seluruh fitur sempurna sekaligus.
+
+Prioritas tahap pertama:
+
+### MUST HAVE
+
+* Login/Register
+* Business onboarding
+* Produk
+* Penjualan
+* Pengeluaran
+* Inventory
+* Dashboard
+* Perhitungan laba
+* Chart
+* Analitik produk
+* AI Business Insight
+* AI Recommendation
+
+### SHOULD HAVE
+
+* Supplier
+* Pembelian
+* Target bisnis
+* Notification
+* Laporan
+* Export
+
+### NICE TO HAVE
+
+* AI chatbot
+* forecasting
+* advanced prediction
+* customer analytics
+* multi-user
+* integrasi marketplace
+
+Fokus utama prototype harus pada fitur yang mendukung solusi utama.
+
+---
+
+# 40. IDENTITAS PRODUK
+
+Posisikan aplikasi sebagai:
+
+> **AI-powered Business Intelligence Platform for Fashion SMEs**
+
+Bukan sebagai:
+
+* aplikasi kasir biasa
+* aplikasi pembukuan biasa
+* chatbot AI
+* marketplace
+* inventory app biasa
+
+Unique Value Proposition:
+
+> **"Dari data bisnis menjadi keputusan."**
+
+Tagline sementara:
+
+> **"Pahami Bisnismu. Temukan Insight. Ambil Keputusan Lebih Baik."**
+
+---
+
+# 41. HASIL AKHIR YANG DIHARAPKAN
+
+Hasil akhir harus berupa web application yang:
+
+1. Memiliki autentikasi.
+2. Memiliki profil bisnis.
+3. Memiliki database bisnis.
+4. Memungkinkan pengguna memasukkan data.
+5. Mengolah data secara otomatis.
+6. Menampilkan dashboard interaktif.
+7. Menampilkan chart.
+8. Menghitung keuntungan dan pengeluaran.
+9. Menganalisis produk.
+10. Menganalisis inventory.
+11. Menghasilkan insight.
+12. Menggunakan AI untuk analisis dan rekomendasi.
+13. Menjelaskan alasan rekomendasi AI.
+14. Memiliki laporan.
+15. Responsive.
+16. Memiliki UI/UX profesional.
+17. Memiliki demo data yang realistis.
+18. Semua fitur utama harus dapat didemonstrasikan secara langsung.
+
+Jangan membuat website yang hanya berisi mockup atau halaman statis.
+
+Prioritaskan functional prototype yang benar-benar dapat digunakan dan didemonstrasikan.
+
+---
+
+# 42. KONTEKS KOMPETISI
+
+Website ini dibuat untuk kompetisi Vibe Code dengan tema:
+
+**"Shaping Tomorrow: Digital Innovation, Artificial Intelligence, and Sustainable Communities"**
+
+Subtema:
+
+**Web Application Development**
+
+Produk harus menunjukkan pemanfaatan teknologi digital dan Artificial Intelligence untuk menyelesaikan permasalahan nyata.
+
+AI juga merupakan bagian dari proses pengembangan sehingga struktur aplikasi dan kode harus mudah dipahami dan dapat dijelaskan oleh developer.
+
+Jangan menggunakan template website yang sudah ada. Buat desain dan struktur aplikasi yang orisinal.
+
+Fokus utama aplikasi:
+
+**Digital Innovation + Artificial Intelligence + Data-driven Decision Making + Sustainable Business Community.**

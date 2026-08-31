@@ -1,0 +1,299 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  phone         String?
+  role          String    @default("OWNER")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  business      Business?
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Business {
+  id              String    @id @default(cuid())
+  name            String
+  type            String
+  description     String?
+  yearEstablished Int?
+  location        String?
+  employeeCount   Int?
+  salesChannels   String[]
+   targetOmzet     Float?
+   targetLaba      Float?
+   targetTransaksi Int?
+   targetGrowth    Float?
+   onboarded       Boolean   @default(false)
+   userId          String    @unique
+   createdAt       DateTime  @default(now())
+   updatedAt       DateTime  @updatedAt
+
+   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products        Product[]
+  sales           Sale[]
+  expenses        Expense[]
+  purchases       Purchase[]
+  suppliers       Supplier[]
+  targets         BusinessTarget[]
+  inventoryTransactions InventoryTransaction[]
+  aiInsights      AIInsight[]
+
+  @@map("businesses")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  sku           String    @unique
+  name          String
+  description   String?
+  image         String?
+  costPrice     Float
+  sellingPrice  Float
+  minStock      Int       @default(0)
+  status        String    @default("ACTIVE")
+  businessId    String
+  categoryId    String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  business      Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category      Category             @relation(fields: [categoryId], references: [id])
+  variants      ProductVariant[]
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id           String    @id @default(cuid())
+  size         String?
+  color        String?
+  colorCode    String?
+  stock        Int       @default(0)
+  productId    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  saleItems    SaleItem[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@unique([productId, size, color])
+  @@map("product_variants")
+}
+
+model Sale {
+  id              String    @id @default(cuid())
+  invoiceNumber   String    @unique
+  date            DateTime  @default(now())
+  paymentMethod   String
+  salesChannel    String
+  discount        Float     @default(0)
+  total           Float
+  status          String    @default("COMPLETED")
+  notes           String?
+  businessId      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  items           SaleItem[]
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id              String    @id @default(cuid())
+  quantity        Int
+  unitPrice       Float
+  total           Float
+  saleId          String
+  productId       String
+  variantId       String?
+  createdAt       DateTime  @default(now())
+
+  sale            Sale       @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product         Product    @relation(fields: [productId], references: [id])
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@map("sale_items")
+}
+
+model ExpenseCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  expenses    Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id              String    @id @default(cuid())
+  date            DateTime  @default(now())
+  amount          Float
+  paymentMethod   String
+  notes           String?
+  attachment      String?
+  businessId      String
+  categoryId      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  category        ExpenseCategory    @relation(fields: [categoryId], references: [id])
+
+  @@map("expenses")
+}
+
+model Supplier {
+  id              String    @id @default(cuid())
+  name            String
+  contact         String?
+  address         String?
+  productsSupplied String[]
+  lastPrice       Float?
+  totalPurchases  Float     @default(0)
+  businessId      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  purchases       Purchase[]
+
+  @@map("suppliers")
+}
+
+model Purchase {
+  id              String    @id @default(cuid())
+  purchaseNumber  String    @unique
+  date            DateTime  @default(now())
+  status          String    @default("PENDING")
+  dueDate         DateTime?
+  total           Float
+  businessId      String
+  supplierId      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  supplier        Supplier   @relation(fields: [supplierId], references: [id])
+  items           PurchaseItem[]
+
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id              String    @id @default(cuid())
+  quantity        Int
+  unitPrice       Float
+  total           Float
+  purchaseId      String
+  productId       String
+  createdAt       DateTime  @default(now())
+
+  purchase        Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product         Product   @relation(fields: [productId], references: [id])
+
+  @@map("purchase_items")
+}
+
+model InventoryTransaction {
+  id              String    @id @default(cuid())
+  type            String
+  quantity        Int
+  notes           String?
+  businessId      String
+  productId       String
+  variantId       String?
+  createdAt       DateTime  @default(now())
+
+  business        Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product         Product         @relation(fields: [productId], references: [id])
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@map("inventory_transactions")
+}
+
+model BusinessTarget {
+  id              String    @id @default(cuid())
+  type            String
+  targetValue     Float
+  period          String
+  startDate       DateTime
+  endDate         DateTime
+  currentValue    Float     @default(0)
+  businessId      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("business_targets")
+}
+
+model AIInsight {
+  id              String    @id @default(cuid())
+  type            String
+  priority        String
+  title           String
+  insight         String
+  recommendation  String
+  reasoning       String?
+  impact          String?
+  data            Json?
+  status          String    @default("NEW")
+  businessId      String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  business        Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("ai_insights")
+}
+
+model Notification {
+  id              String    @id @default(cuid())
+  type            String
+  title           String
+  message         String
+  isRead          Boolean   @default(false)
+  link            String?
+  userId          String
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
