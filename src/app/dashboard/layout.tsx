@@ -1,4 +1,5 @@
 import { Sidebar } from '@/components/layout/sell-sense-sidebar'
+import { TopHeader } from '@/components/layout/top-header'
 
 export default function DashboardLayout({
   children,
@@ -9,11 +10,14 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background">
       <Sidebar />
       <div className="lg:pl-64">
-        <main className="min-h-screen">
-          <div className="mx-auto max-w-[1500px] p-5 md:p-8">
-            {children}
-          </div>
-        </main>
+        <div className="mx-auto max-w-[1500px]">
+          <TopHeader />
+          <main className="min-h-screen">
+            <div className="p-5 md:p-8">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   )

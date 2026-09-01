@@ -71,27 +71,6 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border/80 bg-background/90 px-5 backdrop-blur md:px-8">
-        <div className="flex items-center gap-3">
-          <div className="lg:hidden">
-            <span className="font-semibold">FashionBiz AI</span>
-          </div>
-          <div className="hidden md:block">
-            <p className="eyebrow">Monday, August 18, 2026</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 border-l border-border pl-3">
-            <div className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              {session.user.name?.charAt(0) || 'U'}
-            </div>
-            <div className="hidden text-left sm:block">
-              <p className="text-xs font-semibold">{session.user.name}</p>
-              <p className="text-[11px] text-muted-foreground">{session.user.business?.name}</p>
-            </div>
-          </div>
-        </div>
-      </header>
       <div className="mx-auto max-w-[1500px]">
         <div className="mb-8">
           <h1 className="page-title">
