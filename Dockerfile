@@ -1,8 +1,8 @@
-FROM node:20-bullseye-slim AS base
+FROM node:20-bookworm-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apt-get update && apt-get install -y --no-install-recommends openssl libssl1.1
+RUN apt-get update && apt-get install -y --no-install-recommends openssl libssl3
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
