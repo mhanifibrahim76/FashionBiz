@@ -11,6 +11,7 @@ RUN npm install -g prisma@5
 
 # Rebuild the source code only when needed
 FROM base AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends openssl libssl3
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
