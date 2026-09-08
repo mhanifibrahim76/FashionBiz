@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fashionbiz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fashionbiz
+      POSTGRES_PASSWORD: fashionbiz123
+      POSTGRES_DB: fashionbiz
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fashionbiz-network
+
+  app:
+    image: node:20-bullseye-slim
+    container_name: fashionbiz-app-dev
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://fashionbiz:fashionbiz123@postgres:5432/fashionbiz?schema=public
+      NEXTAUTH_SECRET: your-secret-key-here-change-in-production
+      NEXTAUTH_URL: http://localhost:3000
+      OPENAI_API_KEY: your-openai-api-key-here
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - node_modules_data:/app/node_modules
+      - next_data:/app/.next
+    command: sh -c "npx prisma generate && npm run dev"
+    depends_on:
+      - postgres
+    networks:
+      - fashionbiz-network
+
+volumes:
+  postgres_data:
+  node_modules_data:
+  next_data:
+
+networks:
+  fashionbiz-network:
+    driver: bridge
