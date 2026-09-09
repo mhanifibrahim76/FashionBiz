@@ -171,30 +171,30 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
           <h1 className="page-title">Products</h1>
           <p className="mt-1 text-sm text-muted-foreground">Manage your catalog, pricing, and product health in one place.</p>
         </div>
-         <button className="button-primary" onClick={handleAdd}>
-           <span className="mr-1">+</span> Add product
-         </button>
-         <div className="flex gap-2">
-           <button
-             onClick={handleDownloadTemplate}
-             className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
-           >
-             <Download className="h-4 w-4" />
-             Download template
-           </button>
-           <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
-             <Upload className="h-4 w-4" />
-             {importing ? 'Importing...' : 'Import CSV'}
-             <input
-               type="file"
-               accept=".csv,text/csv"
-               className="hidden"
-               onChange={handleImportCSV}
-               disabled={importing}
-             />
-           </label>
-         </div>
-       </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
+          >
+            <Download className="h-4 w-4" />
+            Download template
+          </button>
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
+            <Upload className="h-4 w-4" />
+            {importing ? 'Importing...' : 'Import CSV'}
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportCSV}
+              disabled={importing}
+            />
+          </label>
+          <button className="button-primary" onClick={handleAdd}>
+            <span className="mr-1">+</span> Add product
+          </button>
+        </div>
+      </div>
 
        {importResult && (
         <div className={`rounded-lg border p-4 ${importResult.errors.length > 0 ? 'bg-destructive/10 border-destructive/20' : 'bg-green-50 border-green/20'}`}>

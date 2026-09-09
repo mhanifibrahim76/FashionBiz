@@ -15,7 +15,7 @@ services:
       - fashionbiz-network
 
   app:
-    image: node:20-bullseye-slim
+    image: node:20-bookworm-slim
     container_name: fashionbiz-app-dev
     working_dir: /app
     ports:
@@ -28,9 +28,9 @@ services:
       NODE_ENV: development
     volumes:
       - .:/app
-      - node_modules_data:/app/node_modules
-      - next_data:/app/.next
-    command: sh -c "npx prisma generate && npm run dev"
+      - /app/node_modules
+      - /app/.next
+    command: sh -c "apt-get update ; apt-get install -y --no-install-recommends openssl libssl3 ; npm install --ignore-scripts ; npm run dev"
     depends_on:
       - postgres
     networks:
@@ -38,9 +38,11 @@ services:
 
 volumes:
   postgres_data:
-  node_modules_data:
-  next_data:
 
 networks:
   fashionbiz-network:
     driver: bridge
+
+
+
+
