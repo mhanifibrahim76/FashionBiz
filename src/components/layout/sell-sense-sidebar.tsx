@@ -9,15 +9,14 @@ import {
   Boxes,
   BarChart3,
   BrainCircuit,
-  Bot,
   CircleDollarSign,
   FileText,
   Settings,
   Store,
-  Sparkles,
-  ArrowUpRight,
+  User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useSession } from 'next-auth/react'
 
 const nav = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
@@ -31,13 +30,13 @@ const nav = [
     href: '/dashboard/ai-advisor',
     badge: true,
   },
-  { label: 'Profit Simulator', icon: CircleDollarSign, href: '/dashboard/targets' },
+  { label: 'Profit Simulator', icon: CircleDollarSign, href: '/dashboard/profit-simulator' },
   { label: 'Reports', icon: FileText, href: '/dashboard/reports' },
-  { label: 'Settings', icon: Settings, href: '/dashboard/settings' },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   const activeItem = [...nav]
     .filter((item) => pathname === item.href || pathname.startsWith(item.href + '/'))
@@ -81,19 +80,24 @@ export function Sidebar() {
           )
         })}
       </div>
-      <div className="rounded-2xl bg-primary p-4 text-primary-foreground">
-        <div className="mb-3 flex items-center gap-2">
-          <Sparkles className="size-4 text-accent" />
-          <span className="text-xs font-semibold">FashionBiz AI</span>
-        </div>
-        <p className="text-sm leading-5 text-primary-foreground/75">
-          Make smarter decisions with every sale.
-        </p>
+
+      <div className="border-t border-border pt-3 pb-2">
         <Link
-          href="/dashboard/ai-advisor"
-          className="mt-4 text-xs font-semibold text-accent"
+          href="/dashboard/settings"
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-muted-foreground transition-all hover:bg-muted"
         >
-          Open advisor <ArrowUpRight className="ml-1 inline size-3" />
+          <div className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
+            <User className="size-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground">
+              {session?.user?.name || 'User'}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {session?.user?.business?.name || session?.user?.email || 'Pengaturan'}
+            </p>
+          </div>
+          <Settings className="size-4 shrink-0" />
         </Link>
       </div>
     </aside>

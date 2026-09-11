@@ -16,10 +16,22 @@ export type ProductFormData = {
   categoryData?: { name: string }
 }
 
+export type SavedProduct = {
+  id: string
+  name: string
+  sku: string
+  costPrice: number
+  sellingPrice: number
+  minStock: number
+  status?: string
+  category: { name: string }
+  variants: { id: string; size: string | null; color: string | null; colorCode: string | null; stock: number }[]
+}
+
 type ProductModalProps = {
   isOpen: boolean
   onClose: () => void
-  onSave: (product: ProductFormData) => void
+  onSave: (product: SavedProduct) => void
   product?: ProductFormData | null
   categories: string[]
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { X } from 'lucide-react'
 
 type StockModalProps = {
@@ -11,8 +12,7 @@ type StockModalProps = {
 }
 
 export function StockModal({ isOpen, onClose, productId, productName, onUpdated }: StockModalProps) {
-  let quantity = ''
-  let notes = ''
+  const [submitting, setSubmitting] = useState(false)
 
   if (!isOpen) return null
 
@@ -28,6 +28,7 @@ export function StockModal({ isOpen, onClose, productId, productName, onUpdated 
       return
     }
 
+    setSubmitting(true)
     try {
       const res = await fetch(`/api/products/${productId}/stock`, {
         method: 'PATCH',
@@ -45,6 +46,8 @@ export function StockModal({ isOpen, onClose, productId, productName, onUpdated 
       }
     } catch (err) {
       alert('Terjadi kesalahan jaringan')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -85,7 +88,9 @@ export function StockModal({ isOpen, onClose, productId, productName, onUpdated 
           </div>
           <div className="flex gap-2 mt-2">
             <button type="button" onClick={onClose} className="button-secondary flex-1">Batal</button>
-            <button type="submit" className="button-primary flex-1">Tambah stok</button>
+            <button type="submit" disabled={submitting} className="button-primary flex-1">
+              {submitting ? 'Menambah...' : 'Tambah stok'}
+            </button>
           </div>
         </form>
       </div>

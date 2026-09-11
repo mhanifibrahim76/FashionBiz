@@ -1,9 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { Download, Upload } from 'lucide-react'
-import { ProductModal, ProductFormData } from '@/components/products/product-modal'
+import { useState, useMemo, useCallback } from 'react'
+import { Download, Upload, Search } from 'lucide-react'
+import { ProductModal, ProductFormData, SavedProduct } from '@/components/products/product-modal'
 import { StockModal } from '@/components/products/stock-modal'
+
+type ProductVariant = {
+  id: string
+  size: string | null
+  color: string | null
+  stock: number
+}
 
 type Product = {
   id: string
@@ -12,8 +19,9 @@ type Product = {
   costPrice: number
   sellingPrice: number
   minStock: number
+  status: string
   category: { name: string }
-  variants: { stock: number }[]
+  variants: ProductVariant[]
 }
 
 type ProductsClientProps = {
@@ -30,6 +38,9 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
   const [stockModalOpen, setStockModalOpen] = useState(false)
   const [stockProductId, setStockProductId] = useState<string | null>(null)
   const [stockProductName, setStockProductName] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   const openStockModal = (product: Product) => {
     setStockProductId(product.id)
@@ -43,13 +54,51 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
     setStockProductName('')
   }
 
+  const totalStock = useCallback((p: Product) => p.variants.reduce((sum, v) => sum + v.stock, 0), [])
+
+  const status = (p: Product) => {
+    const stock = totalStock(p)
+    if (stock <= p.minStock) return 'Low stock'
+    if (stock > 60) return 'Overstock'
+    return 'Healthy'
+  }
+
+  const filteredProducts = useMemo(() => {
+    const statusKey = (p: Product) => {
+      const stock = totalStock(p)
+      if (stock <= p.minStock) return 'low'
+      if (stock > 60) return 'overstock'
+      return 'healthy'
+    }
+
+    return products.filter((p) => {
+      const matchesSearch =
+        searchQuery.trim() === '' ||
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.sku.toLowerCase().includes(searchQuery.toLowerCase())
+
+      const matchesCategory = categoryFilter === 'all' || p.category.name === categoryFilter
+
+      const matchesStatus = statusFilter === 'all' || statusKey(p) === statusFilter
+
+      return matchesSearch && matchesCategory && matchesStatus
+    })
+  }, [products, searchQuery, categoryFilter, statusFilter, totalStock])
+
   const handleStockUpdated = (newStock: number) => {
     if (stockProductId) {
-      setProducts(products.map(p =>
-        p.id === stockProductId
-          ? { ...p, variants: [{ ...p.variants[0], stock: newStock }] }
-          : p
-      ))
+      setProducts(
+        products.map((p) =>
+          p.id === stockProductId
+            ? {
+                ...p,
+                variants: p.variants.map((v, i) =>
+                  i === 0 ? { ...v, stock: newStock } : v
+                ),
+              }
+            : p
+        )
+      )
     }
   }
 
@@ -60,7 +109,7 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
       const res = await fetch(`/api/products/${product.id}`, { method: 'DELETE' })
       const data = await res.json()
       if (res.ok) {
-        setProducts(products.filter(p => p.id !== product.id))
+        setProducts(products.filter((p) => p.id !== product.id))
       } else {
         alert(data.message || 'Gagal menghapus produk')
       }
@@ -69,30 +118,42 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
     }
   }
 
-  const handleSave = (product: ProductFormData) => {
-    if (product.id) {
-      setProducts(products.map(p => p.id === product.id ? {
-        ...p,
-        name: product.name,
-        sku: product.sku,
-        costPrice: product.costPrice,
-        sellingPrice: product.sellingPrice,
-        minStock: product.minStock,
-        category: { name: product.category },
-        variants: [{ stock: product.stock }],
-      } as Product : p))
-    } else {
-      setProducts([...products, {
-        id: product.id || Date.now().toString(),
-        name: product.name,
-        sku: product.sku,
-        costPrice: product.costPrice,
-        sellingPrice: product.sellingPrice,
-        minStock: product.minStock,
-        category: { name: product.category },
-        variants: [{ stock: product.stock }],
-      } as Product])
-    }
+  const handleSave = (saved: SavedProduct) => {
+    setProducts((prev) => {
+      const existing = prev.find((p) => p.id === saved.id)
+      if (existing) {
+        return prev.map((p) =>
+          p.id === saved.id
+            ? {
+                ...p,
+                name: saved.name,
+                sku: saved.sku,
+                costPrice: saved.costPrice,
+                sellingPrice: saved.sellingPrice,
+                minStock: saved.minStock,
+                category: saved.category,
+                variants: saved.variants || p.variants,
+                status: saved.status || p.status,
+              }
+            : p
+        )
+      } else {
+        return [
+          ...prev,
+          {
+            id: saved.id,
+            name: saved.name,
+            sku: saved.sku,
+            costPrice: saved.costPrice,
+            sellingPrice: saved.sellingPrice,
+            minStock: saved.minStock,
+            status: saved.status || 'ACTIVE',
+            category: saved.category,
+            variants: saved.variants,
+          },
+        ]
+      }
+    })
   }
 
   const handleEdit = (product: Product) => {
@@ -157,10 +218,30 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
     }
   }
 
-  const totalStock = (p: Product) => p.variants.reduce((sum, v) => sum + v.stock, 0)
-  const status = (p: Product) => {
-    const stock = totalStock(p)
-    return stock <= p.minStock ? 'Low stock' : stock > 60 ? 'Overstock' : 'Healthy'
+  const handleExport = () => {
+    const csv = [
+      ['SKU', 'Name', 'Category', 'Cost Price', 'Selling Price', 'Stock', 'Min Stock', 'Status'],
+      ...filteredProducts.map((p) => [
+        p.sku,
+        p.name,
+        p.category.name,
+        p.costPrice,
+        p.sellingPrice,
+        totalStock(p),
+        p.minStock,
+        status(p),
+      ]),
+    ]
+      .map((row) => row.join(','))
+      .join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'products.csv'
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -190,13 +271,17 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
               disabled={importing}
             />
           </label>
+          <button onClick={handleExport} className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted">
+            <Download className="h-4 w-4" />
+            Export
+          </button>
           <button className="button-primary" onClick={handleAdd}>
             <span className="mr-1">+</span> Add product
           </button>
         </div>
       </div>
 
-       {importResult && (
+      {importResult && (
         <div className={`rounded-lg border p-4 ${importResult.errors.length > 0 ? 'bg-destructive/10 border-destructive/20' : 'bg-green-50 border-green/20'}`}>
           <p className={`text-sm font-medium ${importResult.errors.length > 0 ? 'text-destructive' : 'text-green-700'}`}>
             Import selesai: {importResult.success} berhasil, {importResult.skipped} duplikat dilewati
@@ -209,29 +294,39 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
             </ul>
           )}
         </div>
-       )}
+      )}
 
-       <div className="panel overflow-hidden">
+      <div className="panel overflow-hidden">
         <div className="flex flex-col gap-3 border-b border-border p-4 md:flex-row md:items-center md:justify-between">
           <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               placeholder="Search by name or SKU"
-              className="field pl-3"
+              className="field pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex gap-2">
-            <select className="select-compact">
-              <option>All categories</option>
+            <select
+              className="select-compact"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="all">All categories</option>
               {categories.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
-            <select className="select-compact">
-              <option>All statuses</option>
-              <option>Healthy</option>
-              <option>Low stock</option>
-              <option>Dead stock risk</option>
-              <option>Overstock</option>
+            <select
+              className="select-compact"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All statuses</option>
+              <option value="healthy">Healthy</option>
+              <option value="low">Low stock</option>
+              <option value="overstock">Overstock</option>
             </select>
           </div>
         </div>
@@ -244,12 +339,13 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
                 <th>Stock</th>
                 <th>Cost</th>
                 <th>Selling price</th>
+                <th>Margin</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((p) => (
+              {filteredProducts.map((p) => (
                 <tr key={p.id}>
                   <td>
                     <div className="flex items-center gap-3">
@@ -266,6 +362,11 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
                   <td className="font-semibold">{totalStock(p)} pcs</td>
                   <td>Rp{p.costPrice.toLocaleString('id-ID')}</td>
                   <td>Rp{p.sellingPrice.toLocaleString('id-ID')}</td>
+                  <td>
+                    <span className={p.sellingPrice > 0 ? (p.sellingPrice - p.costPrice) / p.sellingPrice * 100 > 30 ? 'text-accent-foreground' : (p.sellingPrice - p.costPrice) / p.sellingPrice * 100 > 15 ? 'text-amber-500' : 'text-destructive' : 'text-muted-foreground'}>
+                      {p.sellingPrice > 0 ? (((p.sellingPrice - p.costPrice) / p.sellingPrice) * 100).toFixed(1) : 0}%
+                    </span>
+                  </td>
                   <td>
                     <span className={`status-badge ${status(p) === 'Healthy' ? 'status-good' : status(p) === 'Low stock' ? 'status-warn' : 'status-risk'}`}>
                       {status(p)}
@@ -286,15 +387,19 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
                   </td>
                 </tr>
               ))}
-              {products.length === 0 && (
+              {filteredProducts.length === 0 && (
                 <tr>
-                <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No products yet. Add your first product to get started.
+                  <td colSpan={8} className="text-center py-8 text-muted-foreground">
+                    No products found. Check your search or filters, or add a new product.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between border-t border-border px-4 py-3 text-xs text-muted-foreground">
+          <span>Showing {filteredProducts.length} of {products.length} products</span>
         </div>
       </div>
 

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Download, Upload, Plus, Check, Loader2 } from 'lucide-react'
-import { ProductModal, ProductFormData } from '@/components/products/product-modal'
+import { ProductModal, ProductFormData, SavedProduct } from '@/components/products/product-modal'
 
 interface SetupWizardProps {
   businessId: string
@@ -59,23 +59,9 @@ export default function SetupWizard({ businessId, businessName, categories, exis
     }
   }
 
-  const handleAddProduct = async (product: ProductFormData) => {
-    try {
-      const res = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product),
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.message || 'Failed to add product')
-      }
-
-      setShowProductModal(false)
-    } catch (err) {
-      console.error('Add product error:', err)
-    }
+  const handleAddProduct = (product: SavedProduct) => {
+    setShowProductModal(false)
+    router.refresh()
   }
 
   const handleComplete = async () => {

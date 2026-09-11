@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils'
 import { SalesChart } from '@/components/dashboard/sales-chart'
+import { DashboardInsights } from '@/components/dashboard/ai-insights'
 
 async function getDashboardData(businessId: string) {
   const [products, sales, expenses] = await Promise.all([
@@ -184,6 +185,10 @@ export default async function DashboardPage() {
               ))}
             </div>
           </section>
+        </div>
+
+        <div className="mt-8">
+          <DashboardInsights />
         </div>
       </div>
     </>
