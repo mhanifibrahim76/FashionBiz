@@ -1,7 +1,5 @@
 'use client'
 
-import { formatCurrency } from '@/lib/utils'
-
 type Insight = {
   type: string
   priority: string
