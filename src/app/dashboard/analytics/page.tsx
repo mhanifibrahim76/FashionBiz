@@ -77,7 +77,7 @@ type InventoryItem = {
   recommendation: string
 }
 
-async function getAnalyticsData(businessId: string, range: Period) {
+async function getAnalyticsData(businessId: string, range: Period, sort: string = 'revenue') {
   const startDate = getStartDate(range)
   const previousStartDate = getPreviousStartDate(range)
   const previousEndDate = getPreviousEndDate(range)
@@ -280,7 +280,12 @@ async function getAnalyticsData(businessId: string, range: Period) {
       currentStock: totalStock,
       minStock: p.minStock,
     }
-  }).sort((a, b) => b.revenue - a.revenue)
+  }).sort((a, b) => {
+    if (sort === 'profit') return b.profit - a.profit
+    if (sort === 'units') return b.unitsSold - a.unitsSold
+    if (sort === 'margin') return b.margin - a.margin
+    return b.revenue - a.revenue
+  })
 
   const lowStockProducts = topProducts
     .filter((p) => p.currentStock <= p.minStock)
@@ -464,7 +469,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams?: {
   })
   if (!business?.onboarded) redirect('/dashboard/setup-wizard')
 
-  const data = await getAnalyticsData(session.user.business.id, range)
+  const data = await getAnalyticsData(session.user.business.id, range, searchParams?.sort)
 
   return (
     <div className="flex flex-col gap-7">
