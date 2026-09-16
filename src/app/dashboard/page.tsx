@@ -5,7 +5,10 @@ import { redirect } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils'
 import { SalesChart } from '@/components/dashboard/sales-chart'
 import { DashboardInsights } from '@/components/dashboard/ai-insights'
+import { LowStockAlerts } from '@/components/dashboard/low-stock-alerts'
 import { subDays } from 'date-fns'
+import Link from 'next/link'
+import { Brain, Target, TrendingUp, Sparkles } from 'lucide-react'
 
 type DashboardProduct = {
   id: string
@@ -16,7 +19,7 @@ type DashboardProduct = {
   minStock: number
   status: string
   category: { name: string } | null
-  variants: { id: string; stock: number }[]
+  variants: { id: string; size: string | null; color: string | null; stock: number }[]
 }
 
 type DashboardSale = {
@@ -109,16 +112,19 @@ async function getDashboardData(businessId: string) {
     .sort((a, b) => b.unitsSold - a.unitsSold)
     .slice(0, 5)
 
-  const categoryData: Record<string, { revenue: number; units: number; color: string }> = {}
+  const categoryData: Record<string, { revenue: number; units: number; profit: number }> = {}
 
   sales.forEach((sale) => {
     sale.items.forEach((item) => {
       const catName = item.product?.category?.name || 'Uncategorized'
       if (!categoryData[catName]) {
-        categoryData[catName] = { revenue: 0, units: 0, color: '' }
+        categoryData[catName] = { revenue: 0, units: 0, profit: 0 }
       }
-      categoryData[catName].revenue += item.quantity * (item.product?.sellingPrice || 0)
+      const revenue = item.quantity * (item.product?.sellingPrice || 0)
+      const cost = item.quantity * (item.product?.costPrice || 0)
+      categoryData[catName].revenue += revenue
       categoryData[catName].units += item.quantity
+      categoryData[catName].profit += revenue - cost
     })
   })
 
@@ -135,10 +141,29 @@ async function getDashboardData(businessId: string) {
       name,
       revenue: data.revenue,
       units: data.units,
+      profit: data.profit,
       color: categoryColors[name] || 'bg-slate-500',
     }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 5)
+
+  const totalCategoryRevenue = categories.reduce((s, c) => s + c.revenue, 0)
+  const totalCategoryUnits = categories.reduce((s, c) => s + c.units, 0)
+  const topByUnits = categories.length > 0 ? [...categories].sort((a, b) => b.units - a.units)[0] : null
+  const topByRevenue = categories.length > 0 ? categories[0] : null
+  const topByProfit = categories.length > 0 ? [...categories].sort((a, b) => b.profit - a.profit)[0] : null
+
+  let categoryInsight = ''
+  if (topByRevenue && topByUnits && totalCategoryRevenue > 0) {
+    const revenueShare = (topByRevenue.revenue / totalCategoryRevenue) * 100
+    if (revenueShare >= 50) {
+      categoryInsight = `${topByRevenue.name} menyumbang ${revenueShare.toFixed(0)}% dari total revenue. Pertimbangkan diversifikasi kategori untuk mengurangi risiko.`
+    } else if (topByUnits.name !== topByRevenue.name) {
+      categoryInsight = `${topByUnits.name} paling laku (${topByUnits.units} pcs), tetapi ${topByRevenue.name} menghasilkan revenue terbesar.`
+    } else {
+      categoryInsight = `${topByRevenue.name} menjadi kategori unggulan dengan ${topByRevenue.units} pcs terjual dan revenue ${formatCurrency(topByRevenue.revenue)}.`
+    }
+  }
 
   const lowStockProducts = products.filter((p) =>
     p.variants.some((v) => v.stock <= p.minStock)
@@ -161,6 +186,12 @@ async function getDashboardData(businessId: string) {
     },
     topSelling,
     categories,
+    categoryInsight: categoryInsight || null,
+    topByRevenue: topByRevenue,
+    topByUnits: topByUnits,
+    topByProfit: topByProfit,
+    totalCategoryRevenue,
+    totalCategoryUnits,
     lowStockProducts,
   }
 }
@@ -230,7 +261,19 @@ export default async function DashboardPage() {
     redirect('/dashboard/setup-wizard')
   }
 
-  const data = await getDashboardData(session.user.business.id)
+  const [data, suppliers, pendingPurchases] = await Promise.all([
+    getDashboardData(session.user.business.id),
+    prisma.supplier.findMany({
+      where: { businessId: session.user.business.id },
+      select: { id: true, name: true, contact: true, address: true },
+    }),
+    prisma.purchaseItem.findMany({
+      where: {
+        purchase: { status: 'PENDING', businessId: session.user.business.id },
+      },
+      select: { productId: true, quantity: true },
+    }),
+  ])
 
   return (
     <>
@@ -264,23 +307,71 @@ export default async function DashboardPage() {
                 <h2 className="section-title">Sales by category</h2>
               </div>
             </div>
-            <div className="mt-8 flex items-center justify-center gap-8">
-              <div className="donut">
-                <div>
-                  <strong>{data.categories.length}</strong>
-                  <span>categories</span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-3">
-                {data.categories.map((cat, i) => (
-                  <div className="flex items-center gap-2 text-xs" key={cat.name}>
-                    <span className={`size-2 rounded-full ${i === 0 ? 'bg-primary' : i === 1 ? 'bg-accent' : i === 2 ? 'bg-chart-3' : i === 3 ? 'bg-chart-4' : 'bg-muted-foreground'}`} />
-                    <span className="flex-1 text-muted-foreground">{cat.name}</span>
-                    <span className="font-semibold">{cat.units} pcs</span>
+
+            {data.categories.length === 0 ? (
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                Belum ada data penjualan pada periode ini.
+              </p>
+            ) : (
+              <>
+                <div className="mt-4 flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:justify-center">
+                  <div className="donut relative size-40 rounded-full"
+                    style={{
+                      background: `conic-gradient(${
+                        data.categories.map((cat, i) => {
+                          const color = i === 0 ? 'var(--primary)' : i === 1 ? 'var(--accent)' : i === 2 ? 'var(--chart-3)' : i === 3 ? 'var(--chart-4)' : 'var(--muted-foreground)'
+                          const total = data.categories.reduce((s, c) => s + c.revenue, 0) || 1
+                          const pct = (cat.revenue / total) * 100
+                          const prev = data.categories.slice(0, i).reduce((s, c) => s + (c.revenue / (data.categories.reduce((t, x) => t + x.revenue, 0) || 1)) * 100, 0)
+                          return `${color} ${prev}% ${(prev + pct)}%`
+                        }).join(', ')
+                      })`
+                    }}
+                  >
+                    <div>
+                      <strong>{data.categories.length}</strong>
+                      <span>categories</span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+
+                  <div className="flex flex-col gap-2.5">
+                    {data.categories.map((cat, i) => (
+                      <div className="flex items-center gap-2 text-xs" key={cat.name}>
+                        <span className={`size-2 rounded-full ${i === 0 ? 'bg-primary' : i === 1 ? 'bg-accent' : i === 2 ? 'bg-chart-3' : i === 3 ? 'bg-chart-4' : 'bg-muted-foreground'}`} />
+                        <span className="w-20 truncate text-muted-foreground">{cat.name}</span>
+                        <span className="font-semibold">{cat.units} pcs</span>
+                        <span className="text-muted-foreground">·</span>
+                        <span className="font-semibold">{formatCurrency(cat.revenue)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-border pt-4">
+                  <div className="text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Top by units</p>
+                    <p className="mt-1 truncate text-sm font-semibold">{data.topByUnits?.name || '—'}</p>
+                    <p className="text-xs text-muted-foreground">{data.topByUnits ? `${data.topByUnits.units} pcs` : ''}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Top by revenue</p>
+                    <p className="mt-1 truncate text-sm font-semibold">{data.topByRevenue?.name || '—'}</p>
+                    <p className="text-xs text-muted-foreground">{data.topByRevenue ? formatCurrency(data.topByRevenue.revenue) : ''}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Top by profit</p>
+                    <p className="mt-1 truncate text-sm font-semibold">{data.topByProfit?.name || '—'}</p>
+                    <p className="text-xs text-muted-foreground">{data.topByProfit ? formatCurrency(data.topByProfit.profit) : ''}</p>
+                  </div>
+                </div>
+
+                {data.categoryInsight && (
+                  <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5">
+                    <p className="text-xs leading-5 text-muted-foreground">{data.categoryInsight}</p>
+                  </div>
+                )}
+              </>
+            )}
           </section>
         </div>
 
@@ -325,48 +416,80 @@ export default async function DashboardPage() {
             </div>
           </section>
 
+          <LowStockAlerts products={data.lowStockProducts} suppliers={suppliers} pendingPurchases={pendingPurchases} />
+        </div>
+
+        <div className="mt-8 grid gap-5 lg:grid-cols-[1.4fr_1fr]">
           <section className="panel">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Action needed</p>
-                <h2 className="section-title">Low stock alerts</h2>
+                <p className="eyebrow">AI Insights</p>
+                <h2 className="section-title">AI Business Advisor</h2>
               </div>
-              <span className="rounded-full bg-destructive/10 px-2 py-1 text-xs font-semibold text-destructive">
-                {data.lowStockProducts.length} alerts
-              </span>
+            </div>
+            <div className="mt-4">
+              <DashboardInsights />
+            </div>
+            <div className="mt-4 border-t border-border pt-4">
+              <Link
+                href="/dashboard/ai-advisor"
+                className="flex items-center gap-2 text-xs font-semibold text-accent-foreground hover:underline"
+              >
+                <Sparkles className="size-3" />
+                Buka AI Advisor untuk percakapan mendalam
+              </Link>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Business targets</p>
+                <h2 className="section-title">Target Bisnis</h2>
+              </div>
             </div>
             <div className="mt-4 flex flex-col gap-3">
-              {data.lowStockProducts.slice(0, 5).map((p) => (
-                <div className="alert-row" key={p.id}>
-                  <div className={`product-swatch ${categoryColor(p.category?.name)}`}>
-                    <span>{p.name.charAt(0)}</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">{p.name}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {p.variants.reduce((sum, v) => sum + v.stock, 0)} pcs left - min {p.minStock}
-                    </p>
-                  </div>
-                  <a
-                    href="/dashboard/inventory"
-                    className="button-small"
-                  >
-                    Reorder
-                  </a>
+              <div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Revenue</span>
+                  <span className="font-semibold">
+                    {formatCurrency(data.metrics.revenue)} / Rp 10.000.000
+                  </span>
                 </div>
-              ))}
-              {data.lowStockProducts.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Semua stok dalam keadaan baik.
-                </p>
-              )}
+                <div className="mt-1.5 w-full rounded-full bg-muted h-2">
+                  <div
+                    className="bg-accent h-2 rounded-full transition-all"
+                    style={{ width: `${Math.min((data.metrics.revenue / 10000000) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">Profit</span>
+                  <span className="font-semibold">
+                    {formatCurrency(data.metrics.profit)} / Rp 3.000.000
+                  </span>
+                </div>
+                <div className="mt-1.5 w-full rounded-full bg-muted h-2">
+                  <div
+                    className="bg-accent h-2 rounded-full transition-all"
+                    style={{ width: `${Math.min((data.metrics.profit / 3000000) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 border-t border-border pt-4">
+              <Link
+                href="/dashboard/targets"
+                className="flex items-center gap-2 text-xs font-semibold text-accent-foreground hover:underline"
+              >
+                <Target className="size-3" />
+                Lihat Target Bisnis & Profit Simulator
+              </Link>
             </div>
           </section>
         </div>
 
-        <div className="mt-8">
-          <DashboardInsights />
-        </div>
       </div>
     </>
   )

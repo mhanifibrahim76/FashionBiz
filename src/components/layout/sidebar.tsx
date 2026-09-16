@@ -150,11 +150,11 @@ export function Sidebar() {
         </nav>
 
         {/* User Profile */}
-        <div className="border-t p-4">
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2">
+        <div className="border-t border-border/60 p-4">
+          <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/40 px-3 py-2.5">
 
             {/* Avatar */}
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15">
               <span className="text-sm font-medium text-primary">
                 UM
               </span>
@@ -162,11 +162,11 @@ export function Sidebar() {
 
             {/* User Info */}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
+              <p className="truncate text-sm font-medium text-foreground">
                 Nama Pemilik
               </p>
 
-              <p className="truncate text-xs text-gray-500">
+              <p className="truncate text-xs text-muted-foreground">
                 Nama Usaha
               </p>
             </div>

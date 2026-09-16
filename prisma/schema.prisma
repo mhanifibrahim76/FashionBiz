@@ -106,6 +106,7 @@ model ProductVariant {
   product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
   saleItems    SaleItem[]
   inventoryTransactions InventoryTransaction[]
+  purchaseItems PurchaseItem[]
 
   @@unique([productId, size, color])
   @@map("product_variants")
@@ -203,13 +204,14 @@ model Purchase {
   status          String    @default("PENDING")
   dueDate         DateTime?
   total           Float
+  notes           String?
   businessId      String
-  supplierId      String
+  supplierId      String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   business        Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  supplier        Supplier   @relation(fields: [supplierId], references: [id])
+  supplier        Supplier?  @relation(fields: [supplierId], references: [id])
   items           PurchaseItem[]
 
   @@map("purchases")
@@ -222,10 +224,12 @@ model PurchaseItem {
   total           Float
   purchaseId      String
   productId       String
+  variantId       String?
   createdAt       DateTime  @default(now())
 
   purchase        Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
   product         Product   @relation(fields: [productId], references: [id])
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@map("purchase_items")
 }

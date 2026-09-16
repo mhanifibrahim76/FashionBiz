@@ -21,9 +21,11 @@ export default async function ExpensesPage() {
     <div className="flex flex-col gap-7">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Operations</p>
-          <h1 className="page-title">Expenses</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Track every cost and keep your margins protected.</p>
+          <p className="eyebrow">Keuangan</p>
+          <h1 className="page-title">Biaya Operasional</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Catat biaya bisnis dan jaga margin tetap sehat.
+          </p>
         </div>
         <button className="button-primary">
           <span className="mr-1">+</span> Add expense
@@ -32,15 +34,15 @@ export default async function ExpensesPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="metric-card">
-          <p className="text-xs text-muted-foreground">Total expenses</p>
+          <p className="text-xs text-muted-foreground">Total biaya</p>
           <p className="mt-3 text-2xl font-semibold">{formatCurrency(totalExpenses)}</p>
         </div>
         <div className="metric-card">
-          <p className="text-xs text-muted-foreground">Categories</p>
+          <p className="text-xs text-muted-foreground">Kategori</p>
           <p className="mt-3 text-2xl font-semibold">{expenses.length > 0 ? [...new Set(expenses.map(e => e.categoryId))].length : 0}</p>
         </div>
         <div className="metric-card">
-          <p className="text-xs text-muted-foreground">This month</p>
+          <p className="text-xs text-muted-foreground">Bulan ini</p>
           <p className="mt-3 text-2xl font-semibold">{formatCurrency(totalExpenses * 0.35)}</p>
         </div>
       </div>
@@ -48,19 +50,19 @@ export default async function ExpensesPage() {
       <div className="panel overflow-hidden">
         <div className="section-heading p-5">
           <div>
-            <p className="eyebrow">Recent</p>
-            <h2 className="section-title">Expense history</h2>
+            <p className="eyebrow">Riwayat</p>
+            <h2 className="section-title">Riwayat Biaya</h2>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Payment</th>
-                <th>Notes</th>
+                <th>Tgl</th>
+                <th>Kategori</th>
+                <th>Jumlah</th>
+                <th>Pemb.</th>
+                <th>Catatan</th>
               </tr>
             </thead>
             <tbody>
@@ -76,7 +78,7 @@ export default async function ExpensesPage() {
               {expenses.length === 0 && (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-muted-foreground">
-                    No expenses recorded yet.
+                    Belum ada biaya operasional tercatat.
                   </td>
                 </tr>
               )}
