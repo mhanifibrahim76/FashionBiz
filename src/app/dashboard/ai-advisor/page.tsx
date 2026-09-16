@@ -122,7 +122,7 @@ export default function AIAdvisorPage() {
           <p className="mt-1 text-sm text-muted-foreground">Your AI-powered business decision assistant.</p>
         </div>
         <span className="badge-lime">
-          <span className="mr-1">✨</span> Context-aware
+          <span className="mr-1">✨</span> Untungin AI
         </span>
       </div>
 
@@ -186,7 +186,7 @@ export default function AIAdvisorPage() {
               <span className="text-lg">🤖</span>
             </div>
             <div>
-              <p className="font-semibold">FashionBiz AI Advisor</p>
+              <p className="font-semibold">Untungin AI Advisor</p>
               <p className="text-xs text-muted-foreground">
                 Analyzing your sales, inventory, and profit data
               </p>
@@ -201,7 +201,7 @@ export default function AIAdvisorPage() {
                   <span className="text-2xl">🤖</span>
                 </div>
                 <div>
-                  <p className="font-semibold">Hai! Saya AI Advisor FashionBiz.</p>
+                  <p className="font-semibold">Hai! Saya Untungin AI Advisor.</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Saya menganalisis data penjualan, stok, dan profit Anda untuk memberikan rekomendasi yang dipersonalisasi.
                   </p>

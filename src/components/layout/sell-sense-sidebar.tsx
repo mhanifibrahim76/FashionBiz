@@ -49,7 +49,7 @@ export function Sidebar() {
           <Store className="size-5" />
         </div>
         <div>
-          <p className="font-semibold tracking-tight">FashionBiz AI</p>
+          <p className="font-semibold tracking-tight">Untungin</p>
           <p className="text-xs text-sidebar-foreground/60">
             AI business intelligence
           </p>
