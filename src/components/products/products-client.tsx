@@ -4,6 +4,8 @@ import { useState, useMemo, useCallback } from 'react'
 import { Download, Upload, Search } from 'lucide-react'
 import { ProductModal, ProductFormData, SavedProduct } from '@/components/products/product-modal'
 import { StockModal } from '@/components/products/stock-modal'
+import { ProductActionMenu } from '@/components/products/product-action-menu'
+import { DeleteConfirmModal } from '@/components/products/delete-confirm-modal'
 
 type ProductVariant = {
   id: string
@@ -41,6 +43,9 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const openStockModal = (product: Product) => {
     setStockProductId(product.id)
@@ -102,19 +107,23 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
     }
   }
 
-  const handleDelete = async (product: Product) => {
-    if (!confirm(`Hapus produk ${product.name}?`)) return
-
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
     try {
-      const res = await fetch(`/api/products/${product.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/products/${deleteTarget.id}`, { method: 'DELETE' })
       const data = await res.json()
       if (res.ok) {
-        setProducts(products.filter((p) => p.id !== product.id))
+        setProducts(products.filter((p) => p.id !== deleteTarget.id))
+        setDeleteConfirmOpen(false)
+        setDeleteTarget(null)
       } else {
         alert(data.message || 'Gagal menghapus produk')
       }
     } catch (err) {
       alert('Terjadi kesalahan jaringan')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -373,17 +382,18 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
                     </span>
                   </td>
                   <td>
-                    <div className="flex gap-2">
-                      <button onClick={() => openStockModal(p)} className="text-xs font-semibold text-muted-foreground hover:text-foreground">
-                        Tambah stok
-                      </button>
-                      <button onClick={() => handleEdit(p)} className="text-xs font-semibold text-muted-foreground hover:text-foreground">
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(p)} className="text-xs font-semibold text-red-500 hover:text-red-700">
-                        Hapus
-                      </button>
-                    </div>
+                    <ProductActionMenu
+                      onAction={(action) => {
+                        if (action === 'view') {
+                          openStockModal(p)
+                        } else if (action === 'edit') {
+                          handleEdit(p)
+                        } else if (action === 'delete') {
+                          setDeleteTarget(p)
+                          setDeleteConfirmOpen(true)
+                        }
+                      }}
+                    />
                   </td>
                 </tr>
               ))}
@@ -417,6 +427,14 @@ export function ProductsClient({ initialProducts, categories }: ProductsClientPr
         productId={stockProductId || ''}
         productName={stockProductName}
         onUpdated={handleStockUpdated}
+      />
+
+      <DeleteConfirmModal
+        isOpen={deleteConfirmOpen}
+        productName={deleteTarget?.name || ''}
+        onClose={() => { setDeleteConfirmOpen(false); setDeleteTarget(null) }}
+        onConfirm={handleDelete}
+        loading={deleting}
       />
     </div>
   )

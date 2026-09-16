@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -13,7 +14,6 @@ import {
   FileText,
   Brain,
   Settings,
-  Store,
   User,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -92,8 +92,15 @@ export function Sidebar() {
       }}
     >
       <div className="flex items-center gap-3 px-3">
-        <div className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground">
-          <Store className="size-5" />
+        <div className="grid size-9 place-items-center rounded-xl bg-white/10 p-1">
+          <Image
+            src="/logo.png"
+            alt="Untungin Logo"
+            width={28}
+            height={28}
+            priority
+            className="object-contain"
+          />
         </div>
         <div>
           <p className="font-semibold tracking-tight text-white">Untungin</p>

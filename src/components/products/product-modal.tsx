@@ -172,15 +172,13 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label>Opening stock</label>
-              <input
-                type="number"
-                className="field"
-                value={form.stock}
-                onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
-                placeholder="50"
-                required
-              />
+              <label>Current stock</label>
+              <div className="mt-1 flex h-10 items-center rounded-lg border border-border bg-muted px-3 text-sm text-muted-foreground">
+                {form.stock} pcs
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Stock is managed through Inventory and Purchases.
+              </p>
             </div>
             <div>
               <label>Minimum stock</label>
