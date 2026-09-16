@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY || '',
+  baseURL: 'https://api.groq.com/openai/v1',
 })
 
 function buildBusinessContext(
@@ -89,15 +90,15 @@ Business Targets:
   return context.trim()
 }
 
-async function callOpenAI(messages: any[], context: string) {
-  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your-openai-api-key-here') {
-    return `AI Advisor Demo Mode
+async function callGroq(messages: any[], context: string) {
+  if (!process.env.GROQ_API_KEY) {
+    return `Untungin AI Advisor Demo Mode
 
 Berdasarkan data bisnis Anda:
 
 ${context}
 
-Saya dapat melihat bahwa bisnis Anda memiliki ${messages.length} interaksi. Untuk fitur AI yang sepenuhnya fungsional, silakan konfigurasi OPENAI_API_KEY di file .env Anda.
+Saya dapat melihat bahwa bisnis Anda memiliki ${messages.length} interaksi. Untuk fitur AI yang sepenuhnya fungsional, silakan konfigurasi GROQ_API_KEY di file .env Anda.
 
 Rekomendasi berdasarkan data:
 - Periksa stok produk secara rutin untuk menghindari kehabisan
@@ -105,26 +106,68 @@ Rekomendasi berdasarkan data:
 - Pantau tren penjualan harian untuk prediksi permintaan`
   }
 
-  const systemPrompt = `You are FashionBiz AI Advisor, a helpful business intelligence assistant for fashion retail SMEs in Indonesia. 
+  const systemPrompt = `You are Untungin AI Advisor, a helpful business intelligence assistant for fashion retail SMEs in Indonesia. 
 
 Your job is to analyze business data and provide actionable insights about revenue, profit, inventory, pricing, and sales performance. Always respond in Indonesian. Be concise but helpful. Use Rupiah (Rp) formatting when mentioning amounts.
 
-Business context:
+FORMATTING RULES:
+- NO markdown asterisks (*), dashes (-), or bullet points
+- NO bold/italic markdown syntax
+- For lists: use numbered format (1., 2., 3.) or clean line breaks
+- For tables: use clean ASCII tables with proper column alignment using | and -
+  * Always include header row with column names
+  * Use proper padding so columns align visually
+  * Example format:
+    | Nama Produk    | Stok | Min Stock | Status    |
+    |----------------|------|-----------|-----------|
+    | Kaos Polos     | 5    | 10        | Low Stock |
+    | Hoodie Hitam   | 25   | 10        | Healthy   |
+- Keep responses structured, clean, and professional like a business report
+- Use clear section headers with line breaks
+- COMPLETE your response fully - do not truncate or end mid-sentence
+- If response is long, prioritize completing the last section/table`
+
+  // Filter out system messages, keep only user/assistant
+  const conversationMessages = messages
+    .filter((m: any) => m.role === 'user' || m.role === 'assistant' || m.role === 'ai')
+    .map((m: any) => ({
+      role: m.role === 'ai' ? 'assistant' : m.role,
+      content: m.content
+    }))
+
+  // Prepend system prompt to FIRST user message
+  const firstUserIdx = conversationMessages.findIndex((m: any) => m.role === 'user')
+  if (firstUserIdx >= 0) {
+    conversationMessages[firstUserIdx].content = `${systemPrompt}\n\nUser: ${conversationMessages[firstUserIdx].content}`
+  } else if (conversationMessages.length > 0) {
+    // Fallback: add as first user message
+    conversationMessages.unshift({ role: 'user', content: systemPrompt })
+  }
+
+  try {
+    const completion = await groq.chat.completions.create({
+      model: 'openai/gpt-oss-120b',
+      messages: conversationMessages,
+      temperature: 0.7,
+      max_tokens: 2000,
+    })
+
+    return completion.choices[0]?.message?.content || 'Maaf, tidak dapat memproses permintaan Anda.'
+  } catch (error: any) {
+    console.error('Groq API error:', error.message)
+    return `Untungin AI Advisor (Demo Mode - API Error)
+
+Berdasarkan data bisnis Anda:
+
 ${context}
 
-When answering, ground your response in the actual data above. If asked about restocking, reference the low stock products. If asked about profit, reference the financial summary and product margins. If the data is insufficient for a question, say so and suggest what data would help.`
+AI tidak dapat terhubung ke Groq API (${error.message?.includes('401') || error.message?.includes('403') ? 'API key tidak valid' : 'error sementara'}).
 
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...messages,
-    ],
-    temperature: 0.7,
-    max_tokens: 800,
-  })
-
-  return completion.choices[0]?.message?.content || 'Maaf, tidak dapat memproses permintaan Anda.'
+Rekomendasi berdasarkan data:
+- Periksa stok produk secara rutin untuk menghindari kehabisan
+- Fokus pada produk dengan margin tinggi
+- Pantau tren penjualan harian untuk prediksi permintaan`
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -184,12 +227,7 @@ export async function POST(request: NextRequest) {
 
     const context = buildBusinessContext(business, products, sales, expenses, lowStockProducts)
 
-    const openaiMessages = userMessages.map((m: any) => ({
-      role: m.role,
-      content: m.content,
-    }))
-
-    const aiResponse = await callOpenAI(openaiMessages, context)
+    const aiResponse = await callGroq(userMessages, context)
 
     return NextResponse.json({
       reply: aiResponse,

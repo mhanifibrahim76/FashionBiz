@@ -4,8 +4,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY || '',
+  baseURL: 'https://api.groq.com/openai/v1',
 })
 
 function buildBusinessContext(
@@ -86,6 +87,73 @@ Business Targets:
 `
 }
 
+async function callGroqForInsights(context: string) {
+  if (!process.env.GROQ_API_KEY) {
+    return [
+      {
+        type: 'GENERAL',
+        priority: 'INFO',
+        icon: '🤖',
+        title: 'Untungin AI siap digunakan',
+        description: 'Hubungkan GROQ_API_KEY untuk insight bisnis yang dipersonalisasi.',
+        recommendation: 'Pergi ke Settings untuk mengonfigurasi kunci API AI.',
+        reasoning: context,
+        impact: 'medium',
+      },
+    ]
+  }
+
+  const prompt = `Based on the following business data, generate 5 concise, actionable AI business insights for Untungin, a fashion retail business in Indonesia. Each insight should have: type, priority (CRITICAL/HIGH/MEDIUM/LOW), icon, title, description, recommendation, reasoning, and impact. Return as JSON object with key "insights" containing an array.
+
+${context}`
+
+  try {
+    const completion = await groq.chat.completions.create({
+      model: 'openai/gpt-oss-120b',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.5,
+      max_tokens: 2000,
+      response_format: { type: 'json_object' },
+    })
+
+    const content = completion.choices[0]?.message?.content || '{}'
+
+    let parsed: any
+    try {
+      parsed = JSON.parse(content)
+    } catch {
+      return [
+        {
+          type: 'GENERAL',
+          priority: 'INFO',
+          icon: '🤖',
+          title: 'AI sedang menganalisis data',
+          description: 'Kami sedang memproses data bisnis Anda untuk menghasilkan insight.',
+          recommendation: 'Periksa kembali dalam beberapa saat.',
+          reasoning: '',
+          impact: 'medium',
+        },
+      ]
+    }
+
+    return parsed.insights || parsed || []
+  } catch (error: any) {
+    console.error('Groq API error:', error.message)
+    return [
+      {
+        type: 'GENERAL',
+        priority: 'INFO',
+        icon: '🤖',
+        title: 'Untungin AI (Demo Mode)',
+        description: `API error: ${error.message?.includes('401') || error.message?.includes('403') ? 'API key tidak valid' : 'Koneksi gagal'}`,
+        recommendation: 'Periksa GROQ_API_KEY di Settings atau coba lagi nanti.',
+        reasoning: context,
+        impact: 'medium',
+      },
+    ]
+  }
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -136,56 +204,7 @@ export async function GET() {
 
     const context = buildBusinessContext(business, products, sales, expenses, lowStockProducts)
 
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your-openai-api-key-here') {
-      const fallbackInsights = [
-        {
-          type: 'GENERAL',
-          priority: 'INFO',
-          icon: '🤖',
-          title: 'AI siap digunakan',
-          description: 'Hubungkan OPENAI_API_KEY untuk insight bisnis yang dipersonalisasi.',
-          recommendation: 'Pergi ke Settings untuk mengonfigurasi kunci API AI.',
-          reasoning: context,
-          impact: 'medium',
-        },
-      ]
-      return NextResponse.json({ insights: fallbackInsights })
-    }
-
-    const prompt = `Based on the following business data, generate 5 concise, actionable AI business insights for a fashion retail business in Indonesia. Each insight should have: type, priority (CRITICAL/HIGH/MEDIUM/LOW), icon, title, description, recommendation, reasoning, and impact. Return as JSON array.
-
-${context}`
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.5,
-      max_tokens: 2000,
-      response_format: { type: 'json_object' },
-    })
-
-    const content = completion.choices[0]?.message?.content
-
-    let parsed: any
-    try {
-      parsed = JSON.parse(content || '{}')
-    } catch {
-      const fallbackInsights = [
-        {
-          type: 'GENERAL',
-          priority: 'INFO',
-          icon: '🤖',
-          title: 'AI sedang menganalisis data',
-          description: 'Kami sedang memproses data bisnis Anda untuk menghasilkan insight.',
-          recommendation: 'Periksa kembali dalam beberapa saat.',
-          reasoning: '',
-          impact: 'medium',
-        },
-      ]
-      return NextResponse.json({ insights: fallbackInsights })
-    }
-
-    const insights = parsed.insights || parsed || []
+    const insights = await callGroqForInsights(context)
 
     return NextResponse.json({ insights })
   } catch (error) {
