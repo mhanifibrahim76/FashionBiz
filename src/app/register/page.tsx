@@ -82,7 +82,7 @@ export default function RegisterPage() {
               <span className="text-sm">Memuat animasi…</span>
             </div>
           )}
-          <h2 className="-mt-24 text-center text-2xl font-bold text-[#071C2C] max-sm:text-xl">
+          <h2 className="-mt-46 text-center text-2xl font-bold text-[#071C2C] max-sm:text-xl">
             Bangun Bisnis Lebih Cerdas
           </h2>
           <p className="max-w-xs text-center text-sm text-[#5B6D7D] leading-relaxed">

@@ -63,6 +63,22 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string
         session.user.business = token.business as { id: string; name: string; type: string } | undefined
         session.user.phone = token.phone as string | undefined
+
+        const dbUser = await prisma.user.findUnique({
+          where: { email: session.user.email },
+          include: { business: true },
+        })
+        if (dbUser) {
+          session.user.name = dbUser.name
+          session.user.phone = dbUser.phone || undefined
+          if (dbUser.business) {
+            session.user.business = {
+              id: dbUser.business.id,
+              name: dbUser.business.name,
+              type: dbUser.business.type,
+            }
+          }
+        }
       }
       return session
     },
