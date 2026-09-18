@@ -36,7 +36,13 @@ yarn-error.log*
 next-env.d.ts
 
 # Prisma
-/prisma/migrations
+# /prisma/migrations  ← re-enabled: migration files must be tracked by Git for team development
+
+# Local database backups
+/backup_pre_migration_fix.sql
+/backup_*.sql
+/local_backup*.sql
+/fashionbiz_backup.sql
 
 # IDE
 .vscode
