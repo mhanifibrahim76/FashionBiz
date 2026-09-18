@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
+import { Lottie } from 'lottie-react'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -14,11 +15,23 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   })
-
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [animationData, setAnimationData] = useState<any>(null)
+
   const router = useRouter()
+
+  useEffect(() => {
+    fetch('/Revenue.json')
+      .then((response) => {
+        if (!response.ok) throw new Error('Gagal memuat animasi')
+        return response.json()
+      })
+      .then((data) => setAnimationData(data))
+      .catch((error) => console.error('Gagal memuat Lottie:', error))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,7 +63,7 @@ export default function RegisterPage() {
         const data = await res.json()
         setError(data.message || 'Terjadi kesalahan')
       }
-    } catch (error) {
+    } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.')
     } finally {
       setLoading(false)
@@ -58,234 +71,183 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="max-w-md w-full">
-
-        {/* Logo & Header */}
-        <div className="text-center mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center mb-4"
-          >
-            <img
-              src="/logo.png"
-              alt="Untungin"
-              className="h-12 w-12 object-contain"
-            />
-          </Link>
-
-          <h1 className="text-2xl font-bold text-gray-900">
-            Buat Akun Baru
-          </h1>
-
-          <p className="text-gray-600 mt-2">
-            Mulai kelola bisnis fashion Anda
+    <div className="min-h-screen bg-[#FBFCFD]">
+      <div className="mx-auto grid min-h-screen grid-cols-1 md:grid-cols-2">
+        {/* LEFT - Lottie Illustration */}
+        <div className="hidden flex-col items-center justify-center gap-0 p-8 md:flex">
+          {animationData ? (
+            <Lottie src={animationData} loop={true} className="w-full max-w-sm" />
+          ) : (
+            <div className="flex h-64 w-full max-w-sm items-center justify-center text-gray-300">
+              <span className="text-sm">Memuat animasi…</span>
+            </div>
+          )}
+          <h2 className="-mt-24 text-center text-2xl font-bold text-[#071C2C] max-sm:text-xl">
+            Bangun Bisnis Lebih Cerdas
+          </h2>
+          <p className="max-w-xs text-center text-sm text-[#5B6D7D] leading-relaxed">
+            Daftar gratis dan mulai kelola stok, penjualan, serta keuntungan
+            bisnis fashion kamu dengan lebih jelas bersama Untungin.
           </p>
         </div>
 
-        {/* Register Card */}
-        <div className="bg-white rounded-xl shadow-sm border p-8">
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Register Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            {/* Nama Pemilik */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Nama Pemilik
-              </label>
-
-              <input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    name: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              />
-            </div>
-
-            {/* Nama Usaha */}
-            <div>
-              <label
-                htmlFor="businessName"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Nama Usaha
-              </label>
-
-              <input
-                id="businessName"
-                type="text"
-                value={formData.businessName}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    businessName: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Email
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    email: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="nama@email.com"
-                required
-              />
-            </div>
-
-            {/* Nomor Telepon */}
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Nomor Telepon
-              </label>
-
-              <input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    phone: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="08xxxxxxxxxx"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
-
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      password: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary pr-10"
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
+        {/* RIGHT - Register Form */}
+        <div className="flex items-center justify-center px-6 py-12 sm:px-8">
+          <div className="w-full max-w-md">
+            {/* Logo & Header */}
+            <div className="text-center">
+              <Link href="/" className="mb-6 inline-flex items-center justify-center">
+                <img
+                  src="/logo-untungin.png"
+                  alt="Untungin"
+                  className="h-10 w-auto object-contain"
                 />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  aria-label={
-                    showPassword
-                      ? 'Sembunyikan password'
-                      : 'Tampilkan password'
-                  }
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Konfirmasi Password */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Konfirmasi Password
-              </label>
-
-              <input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    confirmPassword: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            {/* Register Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary text-white py-2.5 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? 'Memuat...' : 'Daftar'}
-            </button>
-          </form>
-
-          {/* Login Link */}
-          <div className="mt-6 text-center text-sm">
-            <p className="text-gray-600">
-              Sudah punya akun?{' '}
-              <Link
-                href="/login"
-                className="text-primary font-medium hover:underline"
-              >
-                Masuk di sini
               </Link>
-            </p>
-          </div>
 
+              <h1 className="text-2xl font-bold text-[#071C2C]">Buat Akun Baru</h1>
+              <p className="mt-1.5 text-sm text-[#5B6D7D]">Mulai kelola bisnis fashion Anda</p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                {error}
+              </div>
+            )}
+
+            {/* Register Form */}
+            <form onSubmit={handleSubmit} className="mt-5 space-y-5">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-[#466078] mb-1.5">
+                  Nama Pemilik
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full rounded-lg border border-[#D9E0E6] px-3.5 py-2.5 text-sm text-[#071C2C] placeholder-[#A3B5C4] focus:border-[#D4D900] focus:outline-none focus:ring-1 focus:ring-[#D4D900]"
+                  placeholder="Nama lengkap"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="businessName" className="block text-sm font-medium text-[#466078] mb-1.5">
+                  Nama Usaha
+                </label>
+                <input
+                  id="businessName"
+                  type="text"
+                  value={formData.businessName}
+                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                  className="w-full rounded-lg border border-[#D9E0E6] px-3.5 py-2.5 text-sm text-[#071C2C] placeholder-[#A3B5C4] focus:border-[#D4D900] focus:outline-none focus:ring-1 focus:ring-[#D4D900]"
+                  placeholder="contoh: Toko Kaos Maria"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-[#466078] mb-1.5">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full rounded-lg border border-[#D9E0E6] px-3.5 py-2.5 text-sm text-[#071C2C] placeholder-[#A3B5C4] focus:border-[#D4D900] focus:outline-none focus:ring-1 focus:ring-[#D4D900]"
+                  placeholder="nama@email.com"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-[#466078] mb-1.5">
+                  Nomor Telepon
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="w-full rounded-lg border border-[#D9E0E6] px-3.5 py-2.5 text-sm text-[#071C2C] placeholder-[#A3B5C4] focus:border-[#D4D900] focus:outline-none focus:ring-1 focus:ring-[#D4D900]"
+                  placeholder="08xxxxxxxxxx"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-[#466078] mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full rounded-lg border border-[#D9E0E6] px-3.5 py-2.5 pr-10 text-sm text-[#071C2C] placeholder-[#A3B5C4] focus:border-[#D4D900] focus:outline-none focus:ring-1 focus:ring-[#D4D900]"
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A3B5C4] hover:text-[#466078]"
+                    aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#466078] mb-1.5">
+                  Konfirmasi Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirm ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="w-full rounded-lg border border-[#D9E0E6] px-3.5 py-2.5 pr-10 text-sm text-[#071C2C] placeholder-[#A3B5C4] focus:border-[#D4D900] focus:outline-none focus:ring-1 focus:ring-[#D4D900]"
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A3B5C4] hover:text-[#466078]"
+                    aria-label={showConfirm ? 'Sembunyikan password' : 'Tampilkan password'}
+                  >
+                    {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-[#D4D900] py-2.5 text-sm font-semibold text-[#071C2C] hover:bg-[#E0E500] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? 'Memuat...' : 'Daftar Sekarang'}
+              </button>
+            </form>
+
+            {/* Login Link */}
+            <div className="mt-6 text-center text-sm">
+              <p className="text-[#5B6D7D]">
+                Sudah punya akun?{' '}
+                <Link href="/login" className="font-semibold text-[#071C2C] hover:underline">
+                  Masuk di sini
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
