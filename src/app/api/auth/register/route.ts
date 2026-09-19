@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error) {
+    console.error('Registration error:', error)
     return NextResponse.json(
       { message: 'Terjadi kesalahan server' },
       { status: 500 }
