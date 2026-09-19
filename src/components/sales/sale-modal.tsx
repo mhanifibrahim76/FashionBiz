@@ -21,8 +21,8 @@ type SaleModalProps = {
 export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps) {
   const [productId, setProductId] = useState('')
   const [variantId, setVariantId] = useState('')
-  const [quantity, setQuantity] = useState(1)
-  const [discount, setDiscount] = useState(0)
+  const [quantity, setQuantity] = useState('1')
+  const [discount, setDiscount] = useState('')
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('Cash')
   const [saving, setSaving] = useState(false)
@@ -41,11 +41,13 @@ export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps)
   const selectedProduct = products.find((p) => p.id === productId)
   const selectedVariant = selectedProduct?.variants.find((v) => v.id === variantId)
   const unitPrice = selectedProduct?.sellingPrice ?? 0
-  const total = Math.max(0, unitPrice * quantity - discount)
+  const qtyNum = parseInt(quantity, 10) || 0
+  const discNum = parseInt(discount, 10) || 0
+  const total = Math.max(0, unitPrice * qtyNum - discNum)
 
   const handleSubmit = async () => {
     if (!productId || !selectedVariant) return
-    if (selectedVariant.stock < quantity) {
+    if (selectedVariant.stock < qtyNum) {
       alert('Stok tidak cukup')
       return
     }
@@ -58,8 +60,8 @@ export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps)
         body: JSON.stringify({
           productId,
           variantId,
-          quantity,
-          discount,
+          quantity: qtyNum,
+          discount: discNum,
           notes,
           paymentMethod,
           salesChannel: 'Toko Fisik',
@@ -83,8 +85,8 @@ export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps)
   const reset = () => {
     setProductId('')
     setVariantId('')
-    setQuantity(1)
-    setDiscount(0)
+    setQuantity('1')
+    setDiscount('')
     setNotes('')
     setPaymentMethod('Cash')
   }
@@ -146,11 +148,11 @@ export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps)
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-muted-foreground">Quantity</label>
-              <input
+               <input
                 type="number"
                 min={1}
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                onChange={(e) => setQuantity(e.target.value)}
                 className="field"
               />
             </div>
@@ -167,13 +169,13 @@ export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps)
 
           <div>
             <label className="block text-xs font-medium text-muted-foreground">Discount (Rp)</label>
-            <input
-              type="number"
-              min={0}
-              value={discount}
-              onChange={(e) => setDiscount(Math.max(0, parseInt(e.target.value, 10) || 0))}
-              className="field"
-            />
+               <input
+                type="number"
+                min={0}
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                className="field"
+              />
           </div>
 
           <div className="flex justify-between border-t border-border pt-3">
@@ -211,7 +213,7 @@ export function SaleModal({ isOpen, onClose, onSave, products }: SaleModalProps)
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!productId || !selectedVariant || saving}
+             disabled={!productId || !selectedVariant || saving || qtyNum < 1}
             className="button-primary"
           >
             {saving ? 'Saving...' : 'Record Sale'}
