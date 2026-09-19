@@ -1,11 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { Lottie } from 'lottie-react'
+
+function RegistrationCheck({ onRegistered }: { onRegistered: (value: boolean) => void }) {
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      onRegistered(true)
+    }
+  }, [searchParams, onRegistered])
+  return null
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -17,13 +27,6 @@ export default function LoginPage() {
   const [showRegisteredMsg, setShowRegisteredMsg] = useState(false)
 
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    if (searchParams.get('registered') === 'true') {
-      setShowRegisteredMsg(true)
-    }
-  }, [searchParams])
 
   useEffect(() => {
     fetch('/Revenue.json')
@@ -62,6 +65,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#FBFCFD]">
+      <Suspense fallback={null}>
+        <RegistrationCheck onRegistered={setShowRegisteredMsg} />
+      </Suspense>
       <div className="mx-auto grid min-h-screen grid-cols-1 md:grid-cols-2">
         {/* LEFT - Lottie Illustration */}
         <div className="hidden flex-col items-center justify-center gap-0 p-8 md:flex">
