@@ -34,19 +34,20 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const reportType = url.searchParams.get('type') || 'sales'
     const range = url.searchParams.get('range') || '30d'
+    const format = url.searchParams.get('format') || 'csv'
     const startDate = getStartDate(range)
 
     const businessId = session.user.business.id
 
     switch (reportType) {
       case 'sales':
-        return await generateSalesReport(businessId, startDate)
+        return await generateSalesReport(businessId, startDate, format)
       case 'profit':
-        return await generateProfitReport(businessId, startDate)
+        return await generateProfitReport(businessId, startDate, format)
       case 'inventory':
-        return await generateInventoryReport(businessId)
+        return await generateInventoryReport(businessId, format)
       case 'products':
-        return await generateProductReport(businessId, startDate)
+        return await generateProductReport(businessId, startDate, format)
       default:
         return NextResponse.json({ message: 'Invalid report type' }, { status: 400 })
     }
@@ -56,32 +57,40 @@ export async function GET(request: Request) {
   }
 }
 
-async function generateSalesReport(businessId: string, startDate: Date) {
+async function generateSalesReport(businessId: string, startDate: Date, formatType: string) {
   const sales = await prisma.sale.findMany({
     where: { businessId, date: { gte: startDate } },
     include: { items: { include: { product: true } } },
     orderBy: { date: 'desc' },
   })
 
-  const rows = [
-    'Invoice Number,Date,Payment Method,Items,Qty,Total,Notes',
-  ]
+  const headers = ['Invoice Number', 'Date', 'Payment Method', 'Items', 'Qty', 'Total', 'Notes']
+  const rows: any[][] = []
 
   sales.forEach((sale) => {
     const itemsList = sale.items.map((item) => item.product?.name || 'Unknown').join('; ')
     const qty = sale.items.reduce((sum, item) => sum + item.quantity, 0)
     rows.push([
-      escapeCsv(sale.invoiceNumber),
+      sale.invoiceNumber,
       format(sale.date, 'yyyy-MM-dd HH:mm'),
-      escapeCsv(sale.paymentMethod),
-      escapeCsv(itemsList),
+      sale.paymentMethod,
+      itemsList,
       qty,
       sale.total,
-      escapeCsv(sale.notes || ''),
-    ].join(','))
+      sale.notes || '',
+    ])
   })
 
-  const csv = rows.join('\n')
+  if (formatType === 'json') {
+    const filename = 'sales-report-' + format(new Date(), 'yyyy-MM-dd')
+    return NextResponse.json({ title: 'Sales Report', headers, rows, filename })
+  }
+
+  const csvRows = [
+    headers.join(','),
+    ...rows.map((row) => row.map((v) => escapeCsv(String(v))).join(',')),
+  ]
+  const csv = csvRows.join('\n')
   const filename = 'sales-report-' + format(new Date(), 'yyyy-MM-dd') + '.csv'
 
   return new NextResponse(csv, {
@@ -92,7 +101,7 @@ async function generateSalesReport(businessId: string, startDate: Date) {
   })
 }
 
-async function generateProfitReport(businessId: string, startDate: Date) {
+async function generateProfitReport(businessId: string, startDate: Date, formatType: string) {
   const [sales, expenses] = await Promise.all([
     prisma.sale.findMany({
       where: { businessId, date: { gte: startDate } },
@@ -115,7 +124,8 @@ async function generateProfitReport(businessId: string, startDate: Date) {
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
   const netProfit = grossProfit - totalExpenses
 
-  const monthlyRows: string[] = []
+  const headers = ['Period', 'Revenue', 'COGS', 'Gross Profit', 'Expenses', 'Net Profit']
+  const rows: any[][] = []
 
   const months = Math.min(Math.ceil((Date.now() - startDate.getTime()) / (30 * 24 * 60 * 60 * 1000)), 6)
   for (let i = 0; i < months; i++) {
@@ -141,19 +151,46 @@ async function generateProfitReport(businessId: string, startDate: Date) {
     const exp = monthExpenses.reduce((sum, e) => sum + e.amount, 0)
     const np = gp - exp
 
-    monthlyRows.push([
+    rows.push([
       format(monthStart, 'MMM yyyy'),
       rev,
       cogs,
       gp,
       exp,
       np,
-    ].join(','))
+    ])
   }
 
-  const rows = [
-    'Period,Revenue,COGS,Gross Profit,Expenses,Net Profit',
-    ...monthlyRows,
+  rows.push([])
+  rows.push(['Summary'])
+  rows.push(['Total Revenue', totalRevenue])
+  rows.push(['Total COGS', totalCOGS])
+  rows.push(['Gross Profit', grossProfit])
+  rows.push(['Gross Margin', grossMargin.toFixed(1) + '%'])
+  rows.push(['Total Expenses', totalExpenses])
+  rows.push(['Net Profit', netProfit])
+
+  if (formatType === 'json') {
+    const filename = 'profit-report-' + format(new Date(), 'yyyy-MM-dd')
+    return NextResponse.json({
+      title: 'Profit Report',
+      headers,
+      rows,
+      additionalInfo: {
+        totalRevenue,
+        totalCOGS,
+        grossProfit,
+        grossMargin: grossMargin.toFixed(1) + '%',
+        totalExpenses,
+        netProfit,
+      },
+      filename,
+    })
+  }
+
+  const csvRows = [
+    headers.join(','),
+    ...rows.slice(0, months).map((row) => row.map((v) => escapeCsv(String(v))).join(',')),
     '',
     'Summary',
     'Total Revenue,' + totalRevenue,
@@ -164,18 +201,18 @@ async function generateProfitReport(businessId: string, startDate: Date) {
     'Net Profit,' + netProfit,
   ]
 
-  const csv = rows.join('\n')
-  const filename = 'profit-report-' + format(new Date(), 'yyyy-MM-dd') + '.csv'
+  const csv = csvRows.join('\n')
+  const filename2 = 'profit-report-' + format(new Date(), 'yyyy-MM-dd') + '.csv'
 
   return new NextResponse(csv, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="' + filename + '"',
+      'Content-Disposition': 'attachment; filename="' + filename2 + '"',
     },
   })
 }
 
-async function generateInventoryReport(businessId: string) {
+async function generateInventoryReport(businessId: string, formatType: string) {
   const products = await prisma.product.findMany({
     where: { businessId },
     include: {
@@ -185,9 +222,8 @@ async function generateInventoryReport(businessId: string) {
     orderBy: { name: 'asc' },
   })
 
-  const rows = [
-    'Product Name,SKU,Category,Variant,Stock,Min Stock,Stock Value,Status',
-  ]
+  const headers = ['Product Name', 'SKU', 'Category', 'Variant', 'Stock', 'Min Stock', 'Stock Value', 'Status']
+  const rows: any[][] = []
 
   products.forEach((p) => {
     p.variants.forEach((v) => {
@@ -195,19 +231,28 @@ async function generateInventoryReport(businessId: string) {
       const status = v.stock <= p.minStock ? 'Low Stock' : v.stock > 60 ? 'Overstock' : 'Healthy'
       const variantName = v.size || v.color || 'Default'
       rows.push([
-        escapeCsv(p.name),
-        escapeCsv(p.sku),
-        escapeCsv(p.category?.name || 'Uncategorized'),
-        escapeCsv(variantName),
+        p.name,
+        p.sku,
+        p.category?.name || 'Uncategorized',
+        variantName,
         v.stock,
         p.minStock,
         stockValue.toFixed(0),
         status,
-      ].join(','))
+      ])
     })
   })
 
-  const csv = rows.join('\n')
+  if (formatType === 'json') {
+    const filename = 'inventory-report-' + format(new Date(), 'yyyy-MM-dd')
+    return NextResponse.json({ title: 'Inventory Report', headers, rows, filename })
+  }
+
+  const csvRows = [
+    headers.join(','),
+    ...rows.map((row) => row.map((v) => escapeCsv(String(v))).join(',')),
+  ]
+  const csv = csvRows.join('\n')
   const filename = 'inventory-report-' + format(new Date(), 'yyyy-MM-dd') + '.csv'
 
   return new NextResponse(csv, {
@@ -218,7 +263,7 @@ async function generateInventoryReport(businessId: string) {
   })
 }
 
-async function generateProductReport(businessId: string, startDate: Date) {
+async function generateProductReport(businessId: string, startDate: Date, formatType: string) {
   const products = await prisma.product.findMany({
     where: { businessId },
     include: {
@@ -232,9 +277,8 @@ async function generateProductReport(businessId: string, startDate: Date) {
     orderBy: { name: 'asc' },
   })
 
-  const rows = [
-    'Product Name,SKU,Category,Units Sold,Revenue,Cost,Profit,Margin %,Current Stock,Min Stock',
-  ]
+  const headers = ['Product Name', 'SKU', 'Category', 'Units Sold', 'Revenue', 'Cost', 'Profit', 'Margin %', 'Current Stock', 'Min Stock']
+  const rows: any[][] = []
 
   products.forEach((p) => {
     const unitsSold = p.saleItems.reduce((sum, si) => sum + si.quantity, 0)
@@ -245,9 +289,9 @@ async function generateProductReport(businessId: string, startDate: Date) {
     const totalStock = p.variants.reduce((sum, v) => sum + v.stock, 0)
 
     rows.push([
-      escapeCsv(p.name),
-      escapeCsv(p.sku),
-      escapeCsv(p.category?.name || 'Uncategorized'),
+      p.name,
+      p.sku,
+      p.category?.name || 'Uncategorized',
       unitsSold,
       revenue.toFixed(0),
       cogs.toFixed(0),
@@ -255,10 +299,19 @@ async function generateProductReport(businessId: string, startDate: Date) {
       margin.toFixed(1),
       totalStock,
       p.minStock,
-    ].join(','))
+    ])
   })
 
-  const csv = rows.join('\n')
+  if (formatType === 'json') {
+    const filename = 'product-report-' + format(new Date(), 'yyyy-MM-dd')
+    return NextResponse.json({ title: 'Product Performance', headers, rows, filename })
+  }
+
+  const csvRows = [
+    headers.join(','),
+    ...rows.map((row) => row.map((v) => escapeCsv(String(v))).join(',')),
+  ]
+  const csv = csvRows.join('\n')
   const filename = 'product-report-' + format(new Date(), 'yyyy-MM-dd') + '.csv'
 
   return new NextResponse(csv, {

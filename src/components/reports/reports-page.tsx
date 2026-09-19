@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { formatCurrency } from '@/lib/utils'
 import { ExportAllButton } from '@/components/reports/export-all-button'
+import { PdfExportButton } from '@/components/reports/pdf-export'
 import {
   FileText,
   Download,
@@ -100,12 +101,10 @@ export function ReportsPage({
               {report.desc}
             </p>
             <div className="mt-5 flex gap-2">
-              <a href={exportUrl(report.id)} className="button-primary text-xs">
-                <Download className="mr-1 size-3" /> CSV
-              </a>
-              <button className="button-secondary text-xs">
-                <Download className="mr-1 size-3" /> PDF
-              </button>
+            <a href={exportUrl(report.id)} className="button-primary text-xs">
+              <Download className="mr-1 size-3" /> CSV
+            </a>
+            <PdfExportButton reportType={report.id} range={range} />
             </div>
           </div>
         ))}
