@@ -42,7 +42,18 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(
-      { message: 'Terjadi kesalahan server' },
+      {
+        message: 'Terjadi kesalahan server',
+        debug: {
+          name: error instanceof Error ? error.constructor.name : 'UnknownError',
+          code:
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error
+              ? String(error.code)
+              : undefined,
+        },
+      },
       { status: 500 }
     )
   }
