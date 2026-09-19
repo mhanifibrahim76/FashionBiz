@@ -149,22 +149,22 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label>Cost price</label>
-              <input
+               <input
                 type="number"
                 className="field"
-                value={form.costPrice}
-                onChange={(e) => setForm({ ...form, costPrice: Number(e.target.value) })}
+                value={form.costPrice || ''}
+                onChange={(e) => setForm({ ...form, costPrice: e.target.value === '' ? 0 : Number(e.target.value) })}
                 placeholder="55000"
                 required
               />
             </div>
             <div>
               <label>Selling price</label>
-              <input
+               <input
                 type="number"
                 className="field"
-                value={form.sellingPrice}
-                onChange={(e) => setForm({ ...form, sellingPrice: Number(e.target.value) })}
+                value={form.sellingPrice || ''}
+                onChange={(e) => setForm({ ...form, sellingPrice: e.target.value === '' ? 0 : Number(e.target.value) })}
                 placeholder="89900"
                 required
               />
@@ -182,11 +182,11 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
             </div>
             <div>
               <label>Minimum stock</label>
-              <input
+               <input
                 type="number"
                 className="field"
-                value={form.minStock}
-                onChange={(e) => setForm({ ...form, minStock: Number(e.target.value) })}
+                value={form.minStock || ''}
+                onChange={(e) => setForm({ ...form, minStock: e.target.value === '' ? 0 : Number(e.target.value) })}
                 placeholder="10"
                 required
               />
